@@ -9,7 +9,9 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as EmployeeRouteImport } from './routes/employee'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EmployeeIndexRouteImport } from './routes/employee.index'
@@ -35,9 +37,19 @@ import { Route as AdminAnonymousRouteImport } from './routes/admin.anonymous'
 import { Route as AdminAlertsRouteImport } from './routes/admin.alerts'
 import { Route as AdminActionsRouteImport } from './routes/admin.actions'
 
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EmployeeRoute = EmployeeRouteImport.update({
   id: '/employee',
   path: '/employee',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -164,7 +176,9 @@ const AdminActionsRoute = AdminActionsRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/auth': typeof AuthRoute
   '/employee': typeof EmployeeRouteWithChildren
+  '/onboarding': typeof OnboardingRoute
   '/admin/actions': typeof AdminActionsRoute
   '/admin/alerts': typeof AdminAlertsRoute
   '/admin/anonymous': typeof AdminAnonymousRoute
@@ -190,6 +204,8 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/onboarding': typeof OnboardingRoute
   '/admin/actions': typeof AdminActionsRoute
   '/admin/alerts': typeof AdminAlertsRoute
   '/admin/anonymous': typeof AdminAnonymousRoute
@@ -217,7 +233,9 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/auth': typeof AuthRoute
   '/employee': typeof EmployeeRouteWithChildren
+  '/onboarding': typeof OnboardingRoute
   '/admin/actions': typeof AdminActionsRoute
   '/admin/alerts': typeof AdminAlertsRoute
   '/admin/anonymous': typeof AdminAnonymousRoute
@@ -246,7 +264,9 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/auth'
     | '/employee'
+    | '/onboarding'
     | '/admin/actions'
     | '/admin/alerts'
     | '/admin/anonymous'
@@ -272,6 +292,8 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
+    | '/onboarding'
     | '/admin/actions'
     | '/admin/alerts'
     | '/admin/anonymous'
@@ -298,7 +320,9 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/auth'
     | '/employee'
+    | '/onboarding'
     | '/admin/actions'
     | '/admin/alerts'
     | '/admin/anonymous'
@@ -326,16 +350,32 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
+  AuthRoute: typeof AuthRoute
   EmployeeRoute: typeof EmployeeRouteWithChildren
+  OnboardingRoute: typeof OnboardingRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/employee': {
       id: '/employee'
       path: '/employee'
       fullPath: '/employee'
       preLoaderRoute: typeof EmployeeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -574,7 +614,9 @@ const EmployeeRouteWithChildren = EmployeeRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
+  AuthRoute: AuthRoute,
   EmployeeRoute: EmployeeRouteWithChildren,
+  OnboardingRoute: OnboardingRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
