@@ -19,10 +19,10 @@ import productDashboard from "@/assets/product-dashboard.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "WellWork — Le bien-être au cœur de la performance" },
+      { title: "WellWork" },
       { name: "description", content: "Prévenez les risques psychosociaux avant qu'ils ne touchent votre entreprise. Plateforme QVT multi-tenant, anonymat cryptographique, IA burn-out. Conforme Loi 18-07." },
-      { property: "og:title", content: "WellWork — Le bien-être au cœur de la performance" },
-      { property: "og:description", content: "Prévenir plutôt que réagir. Mesurez, protégez et engagez vos équipes." },
+      { property: "og:title", content: "WellWork" },
+      { property: "og:description", content: "Prévenez les risques psychosociaux avant qu'ils ne touchent votre entreprise. Plateforme QVT multi-tenant, anonymat cryptographique, IA burn-out. Conforme Loi 18-07." },
       { property: "og:type", content: "website" },
     ],
   }),
