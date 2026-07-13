@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { Bell, Building2, LogOut, Moon, ShieldCheck, Sparkles, Sun, User } from "lucide-react";
+import { Bell, Building2, LogOut, Moon, ShieldCheck, Sun, User } from "lucide-react";
+import logoMark from "@/assets/brand/wellwork-logo-mark.png";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,9 +27,15 @@ export function TopNav() {
   return (
     <header className="fixed top-0 inset-x-0 z-50 h-16 glass border-b flex items-center px-4 md:px-6 gap-3">
       <Link to={role === "admin" ? "/admin/dashboard" : "/employee/home"} className="flex items-center gap-2 shrink-0">
-        <div className="w-9 h-9 rounded-xl gradient-brand flex items-center justify-center shadow-elegant">
-          <Sparkles className="w-5 h-5 text-white" />
-        </div>
+        <motion.img
+          src={logoMark}
+          alt="WellWork"
+          className="w-9 h-9 object-contain drop-shadow-[0_2px_8px_rgba(16,185,129,0.35)]"
+          initial={{ opacity: 0, scale: 0.85 }}
+          animate={{ opacity: 1, scale: 1 }}
+          whileHover={{ rotate: [0, -6, 6, 0], scale: 1.08, transition: { duration: 0.6 } }}
+          transition={{ type: "spring", stiffness: 220, damping: 16 }}
+        />
         <div className="hidden sm:block leading-tight">
           <div className="font-display font-bold text-sm">Wellwork</div>
           <div className="text-[10px] text-muted-foreground">Wellbeing Platform</div>

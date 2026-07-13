@@ -7,8 +7,8 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import logoAsset from "@/assets/wellwork-logo.asset.json";
-import wordmarkAsset from "@/assets/wellwork-wordmark.asset.json";
+import logoMark from "@/assets/brand/wellwork-logo-mark.png";
+import wordmark from "@/assets/brand/wellwork-wordmark.png";
 import heroTeam from "@/assets/hero-team.jpg";
 import storyWoman from "@/assets/story-woman.jpg";
 import productDashboard from "@/assets/product-dashboard.jpg";
@@ -39,8 +39,16 @@ function Landing() {
       {/* ============== NAV ============== */}
       <header className="fixed top-0 inset-x-0 z-50 glass border-b border-border/40">
         <div className="max-w-7xl mx-auto flex items-center justify-between h-16 px-6">
-          <Link to="/" className="flex items-center gap-2.5">
-            <img src={logoAsset.url} alt="WellWork" className="w-9 h-9 rounded-lg object-cover shadow-elegant" />
+          <Link to="/" className="flex items-center gap-2.5 group">
+            <motion.img
+              src={logoMark}
+              alt="WellWork"
+              className="w-9 h-9 object-contain drop-shadow-[0_2px_8px_rgba(16,185,129,0.35)]"
+              initial={{ rotate: -8, scale: 0.9, opacity: 0 }}
+              animate={{ rotate: 0, scale: 1, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 200, damping: 14, delay: 0.1 }}
+              whileHover={{ rotate: [0, -6, 6, 0], scale: 1.08, transition: { duration: 0.6 } }}
+            />
             <span className="font-display font-bold text-lg tracking-tight">WellWork</span>
           </Link>
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
@@ -290,7 +298,14 @@ function Landing() {
       {/* ============== FINAL CTA ============== */}
       <section id="pricing" className="py-24 px-6">
         <div className="max-w-5xl mx-auto rounded-[2rem] gradient-mesh p-12 md:p-16 text-white text-center relative overflow-hidden">
-          <img src={logoAsset.url} alt="" className="w-14 h-14 mx-auto rounded-xl mb-6 opacity-90" />
+          <motion.img
+            src={logoMark}
+            alt=""
+            className="w-14 h-14 mx-auto object-contain mb-6"
+            initial={{ opacity: 0, scale: 0.85 }}
+            animate={{ opacity: 0.95, scale: 1, y: [0, -6, 0] }}
+            transition={{ opacity: { duration: 0.6 }, scale: { duration: 0.6 }, y: { duration: 3, repeat: Infinity, ease: "easeInOut" } }}
+          />
           <h2 className="text-3xl md:text-5xl font-bold font-display tracking-tight">Vos équipes sont votre plus bel investissement.</h2>
           <p className="mt-4 text-white/80 max-w-xl mx-auto">Faites en sorte qu'il porte ses fruits — avec WellWork.</p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -304,7 +319,7 @@ function Landing() {
       <footer className="border-t border-border/50 py-14 px-6 bg-sidebar text-sidebar-foreground">
         <div className="max-w-7xl mx-auto grid md:grid-cols-[1.4fr_1fr_1fr_1fr] gap-10">
           <div>
-            <img src={wordmarkAsset.url} alt="WellWork" className="h-9 w-auto rounded" />
+            <img src={wordmark} alt="WellWork" className="h-9 w-auto object-contain" />
             <p className="mt-4 text-sm text-sidebar-foreground/70 max-w-xs">Le bien-être au cœur de la performance. Plateforme QVT & prévention des RPS conforme Loi 18-07.</p>
           </div>
           {[
