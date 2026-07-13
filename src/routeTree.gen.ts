@@ -26,11 +26,13 @@ import { Route as EmployeeEventsRouteImport } from './routes/employee.events'
 import { Route as AdminSurveysRouteImport } from './routes/admin.surveys'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
+import { Route as AdminPlansRouteImport } from './routes/admin.plans'
 import { Route as AdminMessagesRouteImport } from './routes/admin.messages'
 import { Route as AdminLibraryRouteImport } from './routes/admin.library'
 import { Route as AdminEventsRouteImport } from './routes/admin.events'
 import { Route as AdminErpRouteImport } from './routes/admin.erp'
 import { Route as AdminEmployeesRouteImport } from './routes/admin.employees'
+import { Route as AdminDemoRequestsRouteImport } from './routes/admin.demo-requests'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminBurnoutRouteImport } from './routes/admin.burnout'
 import { Route as AdminAnonymousRouteImport } from './routes/admin.anonymous'
@@ -122,6 +124,11 @@ const AdminReportsRoute = AdminReportsRouteImport.update({
   path: '/reports',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminPlansRoute = AdminPlansRouteImport.update({
+  id: '/plans',
+  path: '/plans',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminMessagesRoute = AdminMessagesRouteImport.update({
   id: '/messages',
   path: '/messages',
@@ -145,6 +152,11 @@ const AdminErpRoute = AdminErpRouteImport.update({
 const AdminEmployeesRoute = AdminEmployeesRouteImport.update({
   id: '/employees',
   path: '/employees',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminDemoRequestsRoute = AdminDemoRequestsRouteImport.update({
+  id: '/demo-requests',
+  path: '/demo-requests',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminDashboardRoute = AdminDashboardRouteImport.update({
@@ -184,11 +196,13 @@ export interface FileRoutesByFullPath {
   '/admin/anonymous': typeof AdminAnonymousRoute
   '/admin/burnout': typeof AdminBurnoutRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/demo-requests': typeof AdminDemoRequestsRoute
   '/admin/employees': typeof AdminEmployeesRoute
   '/admin/erp': typeof AdminErpRoute
   '/admin/events': typeof AdminEventsRoute
   '/admin/library': typeof AdminLibraryRoute
   '/admin/messages': typeof AdminMessagesRoute
+  '/admin/plans': typeof AdminPlansRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/surveys': typeof AdminSurveysRoute
@@ -211,11 +225,13 @@ export interface FileRoutesByTo {
   '/admin/anonymous': typeof AdminAnonymousRoute
   '/admin/burnout': typeof AdminBurnoutRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/demo-requests': typeof AdminDemoRequestsRoute
   '/admin/employees': typeof AdminEmployeesRoute
   '/admin/erp': typeof AdminErpRoute
   '/admin/events': typeof AdminEventsRoute
   '/admin/library': typeof AdminLibraryRoute
   '/admin/messages': typeof AdminMessagesRoute
+  '/admin/plans': typeof AdminPlansRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/surveys': typeof AdminSurveysRoute
@@ -241,11 +257,13 @@ export interface FileRoutesById {
   '/admin/anonymous': typeof AdminAnonymousRoute
   '/admin/burnout': typeof AdminBurnoutRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/demo-requests': typeof AdminDemoRequestsRoute
   '/admin/employees': typeof AdminEmployeesRoute
   '/admin/erp': typeof AdminErpRoute
   '/admin/events': typeof AdminEventsRoute
   '/admin/library': typeof AdminLibraryRoute
   '/admin/messages': typeof AdminMessagesRoute
+  '/admin/plans': typeof AdminPlansRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/surveys': typeof AdminSurveysRoute
@@ -272,11 +290,13 @@ export interface FileRouteTypes {
     | '/admin/anonymous'
     | '/admin/burnout'
     | '/admin/dashboard'
+    | '/admin/demo-requests'
     | '/admin/employees'
     | '/admin/erp'
     | '/admin/events'
     | '/admin/library'
     | '/admin/messages'
+    | '/admin/plans'
     | '/admin/reports'
     | '/admin/settings'
     | '/admin/surveys'
@@ -299,11 +319,13 @@ export interface FileRouteTypes {
     | '/admin/anonymous'
     | '/admin/burnout'
     | '/admin/dashboard'
+    | '/admin/demo-requests'
     | '/admin/employees'
     | '/admin/erp'
     | '/admin/events'
     | '/admin/library'
     | '/admin/messages'
+    | '/admin/plans'
     | '/admin/reports'
     | '/admin/settings'
     | '/admin/surveys'
@@ -328,11 +350,13 @@ export interface FileRouteTypes {
     | '/admin/anonymous'
     | '/admin/burnout'
     | '/admin/dashboard'
+    | '/admin/demo-requests'
     | '/admin/employees'
     | '/admin/erp'
     | '/admin/events'
     | '/admin/library'
     | '/admin/messages'
+    | '/admin/plans'
     | '/admin/reports'
     | '/admin/settings'
     | '/admin/surveys'
@@ -476,6 +500,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminReportsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/plans': {
+      id: '/admin/plans'
+      path: '/plans'
+      fullPath: '/admin/plans'
+      preLoaderRoute: typeof AdminPlansRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/messages': {
       id: '/admin/messages'
       path: '/messages'
@@ -509,6 +540,13 @@ declare module '@tanstack/react-router' {
       path: '/employees'
       fullPath: '/admin/employees'
       preLoaderRoute: typeof AdminEmployeesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/demo-requests': {
+      id: '/admin/demo-requests'
+      path: '/demo-requests'
+      fullPath: '/admin/demo-requests'
+      preLoaderRoute: typeof AdminDemoRequestsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/dashboard': {
@@ -555,11 +593,13 @@ interface AdminRouteChildren {
   AdminAnonymousRoute: typeof AdminAnonymousRoute
   AdminBurnoutRoute: typeof AdminBurnoutRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
+  AdminDemoRequestsRoute: typeof AdminDemoRequestsRoute
   AdminEmployeesRoute: typeof AdminEmployeesRoute
   AdminErpRoute: typeof AdminErpRoute
   AdminEventsRoute: typeof AdminEventsRoute
   AdminLibraryRoute: typeof AdminLibraryRoute
   AdminMessagesRoute: typeof AdminMessagesRoute
+  AdminPlansRoute: typeof AdminPlansRoute
   AdminReportsRoute: typeof AdminReportsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminSurveysRoute: typeof AdminSurveysRoute
@@ -572,11 +612,13 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAnonymousRoute: AdminAnonymousRoute,
   AdminBurnoutRoute: AdminBurnoutRoute,
   AdminDashboardRoute: AdminDashboardRoute,
+  AdminDemoRequestsRoute: AdminDemoRequestsRoute,
   AdminEmployeesRoute: AdminEmployeesRoute,
   AdminErpRoute: AdminErpRoute,
   AdminEventsRoute: AdminEventsRoute,
   AdminLibraryRoute: AdminLibraryRoute,
   AdminMessagesRoute: AdminMessagesRoute,
+  AdminPlansRoute: AdminPlansRoute,
   AdminReportsRoute: AdminReportsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminSurveysRoute: AdminSurveysRoute,

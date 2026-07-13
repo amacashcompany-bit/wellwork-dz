@@ -63,7 +63,9 @@ export function useMySpace(): { info: MySpaceInfo | null; loading: boolean; refe
 
       const [{ data: space }, { data: roleRows }] = await Promise.all([
         supabase.from("spaces").select("id, name, slug").eq("id", spaceId).maybeSingle(),
-        supabase.from("user_roles").select("role").eq("user_id", uid).eq("space_id", spaceId),
+        // super_admin is a global role stored with space_id = NULL, so it must be
+        // included alongside this space's roles or super admins never pass hasRole checks.
+        supabase.from("user_roles").select("role").eq("user_id", uid).or(`space_id.eq.${spaceId},space_id.is.null`),
       ]);
 
       if (!mounted) return;

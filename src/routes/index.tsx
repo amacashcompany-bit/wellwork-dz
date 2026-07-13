@@ -7,6 +7,9 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { usePlans } from "@/hooks/usePlans";
+import { DemoRequestDialog } from "@/components/DemoRequestDialog";
 import logoMark from "@/assets/brand/wellwork-logo-mark.png";
 import wordmark from "@/assets/brand/wellwork-wordmark.png";
 import heroTeam from "@/assets/hero-team.jpg";
@@ -295,8 +298,11 @@ function Landing() {
         </div>
       </section>
 
+      {/* ============== PRICING ============== */}
+      <PricingSection />
+
       {/* ============== FINAL CTA ============== */}
-      <section id="pricing" className="py-24 px-6">
+      <section className="py-24 px-6">
         <div className="max-w-5xl mx-auto rounded-[2rem] gradient-mesh p-12 md:p-16 text-white text-center relative overflow-hidden">
           <motion.img
             src={logoMark}
@@ -341,6 +347,71 @@ function Landing() {
         </div>
       </footer>
     </div>
+  );
+}
+
+function PricingSection() {
+  const { plans, loading } = usePlans();
+
+  return (
+    <section id="pricing" className="py-24 px-6 bg-muted/30">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center max-w-2xl mx-auto mb-14">
+          <Badge variant="secondary" className="mb-4">Tarifs</Badge>
+          <h2 className="text-3xl md:text-5xl font-bold font-display tracking-tight">Un plan pour chaque étape de votre croissance.</h2>
+          <p className="mt-4 text-muted-foreground">Commencez avec une démo, évoluez sans friction. Aucune carte bancaire requise pour tester.</p>
+        </div>
+
+        {loading ? (
+          <div className="text-center text-muted-foreground text-sm">Chargement des plans…</div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
+            {plans.map((plan, i) => (
+              <motion.div key={plan.id} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.06 }}>
+                <div className={`h-full p-6 rounded-3xl border bg-card flex flex-col relative ${plan.highlighted ? "border-brand shadow-glow ring-1 ring-brand/30" : ""}`}>
+                  {plan.highlighted && (
+                    <span className="absolute -top-3 start-6 text-[11px] font-semibold px-3 py-1 rounded-full gradient-brand text-white">Le plus populaire</span>
+                  )}
+                  <div className="font-display font-semibold text-lg">{plan.name}</div>
+                  {plan.tagline && <p className="text-sm text-muted-foreground mt-1">{plan.tagline}</p>}
+                  <div className="mt-5">
+                    {plan.price_monthly == null ? (
+                      <div className="text-2xl font-bold">Sur devis</div>
+                    ) : plan.price_monthly === 0 ? (
+                      <div className="text-2xl font-bold">Gratuit</div>
+                    ) : (
+                      <div className="text-2xl font-bold">{plan.price_monthly}€ <span className="text-sm font-normal text-muted-foreground">/mois</span></div>
+                    )}
+                  </div>
+                  <ul className="mt-5 space-y-2.5 text-sm flex-1">
+                    {((plan.features as string[]) ?? []).map((f, idx) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <Check className="w-4 h-4 text-leaf mt-0.5 shrink-0" /> <span className="text-muted-foreground">{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="mt-6">
+                    {plan.is_demo ? (
+                      <DemoRequestDialog trigger={
+                        <Button className="w-full rounded-full" variant={plan.highlighted ? "default" : "outline"}>
+                          Demander l'accès
+                        </Button>
+                      } />
+                    ) : (
+                      <Link to="/auth">
+                        <Button className={`w-full rounded-full ${plan.highlighted ? "gradient-brand text-white border-0" : ""}`} variant={plan.highlighted ? "default" : "outline"}>
+                          Créer mon espace
+                        </Button>
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
   );
 }
 

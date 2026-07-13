@@ -2,10 +2,11 @@ import { Link, useLocation } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import {
   BarChart3, Bell, BookOpen, Bot, Calendar, HelpCircle, Home, Inbox, LayoutDashboard,
-  Lightbulb, MessageSquare, Plug, ScrollText, Settings, ShieldQuestion, Users,
+  Lightbulb, MessageSquare, Plug, ScrollText, Settings, ShieldQuestion, Users, Tag, ClipboardCheck,
 } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
 import { useStore } from "@/store/useStore";
+import { useMySpace, hasRole } from "@/hooks/useAuth";
 import type { DictKey } from "@/lib/i18n";
 
 const adminItems: { to: string; icon: React.ComponentType<{ className?: string }>; key: DictKey; badge?: string }[] = [
@@ -34,9 +35,16 @@ const employeeItems: { to: string; icon: React.ComponentType<{ className?: strin
   { to: "/employee/help", icon: HelpCircle, key: "help" },
 ];
 
+const superAdminItems: { to: string; icon: React.ComponentType<{ className?: string }>; label: [string, string, string] }[] = [
+  { to: "/admin/plans", icon: Tag, label: ["Plans tarifaires", "الخطط التسعيرية", "Pricing plans"] },
+  { to: "/admin/demo-requests", icon: ClipboardCheck, label: ["Demandes de démo", "طلبات العرض التجريبي", "Demo requests"] },
+];
+
 export function Sidebar() {
-  const { t, direction } = useI18n();
+  const { t, direction, pick } = useI18n();
   const role = useStore((s) => s.role);
+  const { info } = useMySpace();
+  const isSuperAdmin = hasRole(info?.roles ?? [], "super_admin");
   const items = role === "admin" ? adminItems : employeeItems;
   const location = useLocation();
 
@@ -75,6 +83,37 @@ export function Sidebar() {
             </Link>
           );
         })}
+
+        {isSuperAdmin && (
+          <>
+            <div className="mt-4 mb-1 px-3 text-[10px] uppercase tracking-widest text-sidebar-foreground/40">
+              {pick("Super admin", "المشرف العام", "Super admin")}
+            </div>
+            {superAdminItems.map((item) => {
+              const active = location.pathname === item.to || location.pathname.startsWith(item.to + "/");
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors ${
+                    active ? "text-white" : "text-sidebar-foreground/70 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  {active && (
+                    <motion.span
+                      layoutId="side-active-super"
+                      className="absolute inset-0 gradient-brand rounded-xl -z-0"
+                      transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                    />
+                  )}
+                  <Icon className="w-4 h-4 relative z-10 shrink-0" />
+                  <span className="relative z-10 flex-1 truncate">{pick(...item.label)}</span>
+                </Link>
+              );
+            })}
+          </>
+        )}
       </nav>
 
       <div className="mt-6 px-3 py-4 rounded-2xl bg-white/5 border border-white/10">
