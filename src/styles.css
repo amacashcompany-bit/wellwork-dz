@@ -137,6 +137,27 @@
   --sidebar-accent-foreground: oklch(0.99 0.003 275);
   --sidebar-border: oklch(0.25 0.06 275);
   --sidebar-ring: oklch(0.62 0.24 278);
+
+  /* Logo-derived accents — emerald leaf + teal check harmonized with indigo */
+  --leaf: oklch(0.72 0.19 155);
+  --leaf-deep: oklch(0.55 0.16 165);
+  --teal: oklch(0.68 0.14 210);
+}
+
+@utility gradient-leaf {
+  background: linear-gradient(135deg, var(--leaf) 0%, var(--teal) 55%, var(--brand) 100%);
+}
+@utility text-gradient-leaf {
+  background: linear-gradient(90deg, var(--leaf) 0%, var(--teal) 50%, var(--brand-light) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+@utility gradient-woba {
+  background:
+    radial-gradient(900px 500px at 85% 15%, color-mix(in oklab, var(--leaf) 28%, transparent), transparent 60%),
+    radial-gradient(700px 500px at 10% 90%, color-mix(in oklab, var(--brand) 25%, transparent), transparent 60%),
+    var(--background);
 }
 
 .dark {
