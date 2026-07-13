@@ -1,133 +1,130 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Copy, Send } from "lucide-react";
+import { Copy, Send, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/AppShell";
 import { AnonymousBanner } from "@/components/shared/AnonymousBanner";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useI18n } from "@/hooks/useI18n";
-import { useStore } from "@/store/useStore";
+import { useMySpace } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { encryptWithKey, generateTicketKey, sha256Hex } from "@/lib/anonymity";
 
 export const Route = createFileRoute("/employee/feedback")({
-  head: () => ({ meta: [{ title: "Feedback anonyme — QVT-Care" }] }),
+  head: () => ({ meta: [{ title: "Feedback anonyme — Wellwork" }] }),
   component: FeedbackPage,
 });
 
 const categories = [
-  { id: "suggestion", emoji: "💡", fr: "Suggestion", ar: "اقتراح", en: "Suggestion" },
-  { id: "conflict", emoji: "⚔️", fr: "Conflit", ar: "نزاع", en: "Conflict" },
-  { id: "harassment", emoji: "🚫", fr: "Harcèlement", ar: "تحرش", en: "Harassment" },
-  { id: "grievance", emoji: "📢", fr: "Plainte", ar: "شكوى", en: "Grievance" },
-  { id: "idea", emoji: "💡", fr: "Idée", ar: "فكرة", en: "Idea" },
-  { id: "other", emoji: "❓", fr: "Autre", ar: "آخر", en: "Other" },
-];
+  { id: "suggestion", emoji: "💡", label: "Suggestion" },
+  { id: "harassment", emoji: "🚫", label: "Harcèlement" },
+  { id: "workload", emoji: "⚖️", label: "Charge de travail" },
+  { id: "management", emoji: "👥", label: "Management" },
+  { id: "safety", emoji: "🦺", label: "Sécurité" },
+  { id: "other", emoji: "❓", label: "Autre" },
+] as const;
 
 function FeedbackPage() {
   const { pick, t } = useI18n();
-  const addPost = useStore((s) => s.addAnonymousPost);
-  const posts = useStore((s) => s.anonymousPosts);
-  const [category, setCategory] = useState("suggestion");
-  const [severity, setSeverity] = useState("low");
+  const { info } = useMySpace();
+  const [category, setCategory] = useState<string>("suggestion");
+  const [subject, setSubject] = useState("");
   const [content, setContent] = useState("");
-  const [sent, setSent] = useState<string | null>(null);
-  const [checkCode, setCheckCode] = useState("");
-  const [foundPost, setFoundPost] = useState<typeof posts[0] | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [sentKey, setSentKey] = useState<string | null>(null);
 
-  const submit = () => {
-    if (!content.trim()) return;
-    const token = "REF-" + Math.random().toString(36).slice(2, 7).toUpperCase();
-    addPost({
-      id: crypto.randomUUID(), token, category: category as "suggestion",
-      severity: severity as "low", content, upvotes: 0, replies: [],
-      createdAt: new Date().toISOString().slice(0, 10), sentiment: "neutral",
-    });
-    setSent(token);
-    setContent("");
-    toast.success(pick("Message reçu anonymement", "تم استلام رسالتك بشكل مجهول", "Message received anonymously"));
+  const submit = async () => {
+    if (!info?.spaceId || !content.trim() || !subject.trim()) return;
+    setBusy(true);
+    try {
+      const key = generateTicketKey();
+      const [encSubj, encBody, keyHash] = await Promise.all([
+        encryptWithKey(subject.trim(), key),
+        encryptWithKey(content.trim(), key),
+        sha256Hex(key),
+      ]);
+      const { error } = await supabase.from("feedback_tickets").insert({
+        space_id: info.spaceId,
+        category: category as "suggestion",
+        encrypted_subject: encSubj,
+        encrypted_content: encBody,
+        ticket_key_hash: keyHash,
+      });
+      if (error) throw error;
+      setSentKey(key);
+      setSubject(""); setContent("");
+      toast.success(pick("Signalement envoyé anonymement", "تم إرسال البلاغ بشكل مجهول", "Report sent anonymously"));
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erreur");
+    } finally {
+      setBusy(false);
+    }
   };
 
-  const checkReply = () => {
-    const p = posts.find((x) => x.token.toLowerCase() === checkCode.trim().toLowerCase());
-    setFoundPost(p ?? null);
-    if (!p) toast.error(pick("Code introuvable", "الرمز غير موجود", "Code not found"));
-  };
-
-  const copy = (v: string) => { navigator.clipboard.writeText(v); toast.success(t("copied")); };
+  const copyKey = () => { if (sentKey) { navigator.clipboard.writeText(sentKey); toast.success(t("copied")); } };
 
   return (
     <div>
-      <PageHeader title={pick("Feedback anonyme", "رأي مجهول", "Anonymous Feedback")} />
+      <PageHeader
+        title={pick("Signalement anonyme", "بلاغ مجهول", "Anonymous Report")}
+        subtitle={pick("Contenu chiffré côté client. Seul votre code de suivi permet de consulter la réponse RH.", "المحتوى مشفر من جانبك. رمز التتبع هو الوحيد الذي يفتح رد الإدارة.", "Client-side encrypted. Only your tracking key opens the HR reply.")}
+      />
       <AnonymousBanner />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
         <Card className="p-6 rounded-2xl">
-          <div className="font-semibold mb-4">{pick("Nouveau message", "رسالة جديدة", "New message")}</div>
+          <div className="font-semibold mb-4">{pick("Nouveau signalement", "بلاغ جديد", "New report")}</div>
           <div className="space-y-4">
             <div>
-              <label className="text-xs font-medium text-muted-foreground">{pick("Catégorie", "الفئة", "Category")} *</label>
+              <label className="text-xs font-medium text-muted-foreground">Catégorie *</label>
               <Select value={category} onValueChange={setCategory}>
                 <SelectTrigger className="rounded-xl mt-1"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.emoji} {pick(c.fr, c.ar, c.en)}</SelectItem>)}
+                  {categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.emoji} {c.label}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <label className="text-xs font-medium text-muted-foreground">{pick("Sévérité (optionnel)", "الخطورة (اختياري)", "Severity (optional)")}</label>
-              <RadioGroup value={severity} onValueChange={setSeverity} className="flex gap-4 mt-2">
-                {[["low", pick("Faible","منخفض","Low")], ["medium", pick("Moyenne","متوسط","Medium")], ["high", pick("Haute","مرتفع","High")]].map(([v, l]) => (
-                  <label key={v as string} className="flex items-center gap-2 cursor-pointer">
-                    <RadioGroupItem value={v as string} /> <span className="text-sm">{l}</span>
-                  </label>
-                ))}
-              </RadioGroup>
+              <label className="text-xs font-medium text-muted-foreground">Sujet *</label>
+              <Input value={subject} onChange={(e) => setSubject(e.target.value)} maxLength={140} className="rounded-xl mt-1" />
             </div>
             <div>
-              <label className="text-xs font-medium text-muted-foreground">{pick("Message", "الرسالة", "Message")} *</label>
-              <Textarea value={content} onChange={(e) => setContent(e.target.value)} className="rounded-xl mt-1 min-h-[140px]" maxLength={2000} placeholder={pick("Écrivez librement…", "اكتب بحرية…", "Write freely…")} />
-              <div className="text-xs text-muted-foreground mt-1 text-end">{content.length} / 2000</div>
+              <label className="text-xs font-medium text-muted-foreground">Message *</label>
+              <Textarea value={content} onChange={(e) => setContent(e.target.value)} className="rounded-xl mt-1 min-h-[160px]" maxLength={4000} />
+              <div className="text-xs text-muted-foreground mt-1 text-end">{content.length} / 4000</div>
             </div>
-            <Button onClick={submit} className="w-full gradient-brand text-white border-0 gap-2 h-11"><Send className="w-4 h-4" /> {pick("Envoyer anonymement", "إرسال بشكل مجهول", "Send anonymously")}</Button>
+            <Button onClick={submit} disabled={busy || !subject.trim() || !content.trim()} className="w-full gradient-brand text-white border-0 gap-2 h-11">
+              {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Send className="w-4 h-4" /> Envoyer chiffré</>}
+            </Button>
 
-            {sent && (
+            {sentKey && (
               <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }}
-                className="mt-4 p-4 rounded-2xl bg-brand-50 border border-brand/20 text-center">
+                className="mt-4 p-5 rounded-2xl bg-brand-50 border border-brand/20 text-center">
                 <div className="text-xs uppercase text-brand font-semibold">{t("yourTrackingCode")}</div>
-                <div className="text-xl font-mono font-bold mt-1">{sent}</div>
-                <Button size="sm" variant="outline" onClick={() => copy(sent)} className="mt-2"><Copy className="w-3.5 h-3.5 me-1" /> {t("copy")}</Button>
+                <div className="text-xl font-mono font-bold mt-2">{sentKey}</div>
+                <div className="text-xs text-muted-foreground mt-3 max-w-sm mx-auto">
+                  Ce code n'est visible qu'une fois. Sans lui, personne — pas même vous — ne peut relire ce signalement.
+                </div>
+                <Button size="sm" variant="outline" onClick={copyKey} className="mt-3"><Copy className="w-3.5 h-3.5 me-1" /> {t("copy")}</Button>
               </motion.div>
             )}
           </div>
         </Card>
 
-        <Card className="p-6 rounded-2xl">
-          <div className="font-semibold mb-4">{pick("Vérifier une réponse RH", "التحقق من رد الإدارة", "Check HR reply")}</div>
-          <div className="flex gap-2">
-            <Input value={checkCode} onChange={(e) => setCheckCode(e.target.value)} placeholder="REF-XXXXX" className="rounded-xl font-mono" />
-            <Button onClick={checkReply} variant="outline">{pick("Vérifier", "تحقق", "Check")}</Button>
-          </div>
-          {foundPost && (
-            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mt-4 space-y-3">
-              <div className="p-3 rounded-xl bg-muted">
-                <div className="text-[10px] uppercase text-muted-foreground">{pick("Votre message", "رسالتك", "Your message")}</div>
-                <div className="text-sm mt-1">{foundPost.content}</div>
-              </div>
-              {foundPost.replies.length > 0 ? foundPost.replies.map((r) => (
-                <div key={r.id} className="p-3 rounded-xl bg-brand-50 border border-brand/15">
-                  <div className="text-[10px] uppercase text-brand font-semibold">{pick("Réponse RH", "رد الموارد البشرية", "HR reply")}</div>
-                  <div className="text-sm mt-1">{r.content}</div>
-                </div>
-              )) : (
-                <div className="text-sm text-muted-foreground text-center py-4">{pick("En attente d'une réponse RH.", "في انتظار رد من الإدارة.", "Awaiting HR reply.")}</div>
-              )}
-            </motion.div>
-          )}
+        <Card className="p-6 rounded-2xl bg-muted/30">
+          <div className="font-semibold mb-3">Comment fonctionne l'anonymat ?</div>
+          <ul className="space-y-3 text-sm text-muted-foreground">
+            <li>✓ Aucun identifiant utilisateur n'est stocké avec votre signalement.</li>
+            <li>✓ Le contenu est chiffré (AES-GCM 256) avec une clé générée dans votre navigateur.</li>
+            <li>✓ Seul le <em>hash</em> de cette clé est stocké côté serveur.</li>
+            <li>✓ Sans le code de suivi, ni les RH ni Wellwork ne peuvent lire le contenu.</li>
+            <li>✓ Aucune IP, aucun email, aucun user-agent lié à ce ticket.</li>
+          </ul>
         </Card>
       </div>
     </div>
