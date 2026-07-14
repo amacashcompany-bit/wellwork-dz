@@ -12,7 +12,7 @@ import { useI18n } from "@/hooks/useI18n";
 import { useAuth, useMySpace, hasRole } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
-import { approveDemoRequestFn, rejectDemoRequestFn } from "@/server/demoDecision";
+import { approveDemoRequestFn, rejectDemoRequestFn } from "@/lib/demoDecision.functions";
 
 export const Route = createFileRoute("/admin/demo-requests")({
   head: () => ({ meta: [{ title: "Demandes de démo — WellWork" }] }),
