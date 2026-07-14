@@ -1011,108 +1011,6 @@ export type Database = {
           },
         ]
       }
-      plans: {
-        Row: {
-          active: boolean
-          created_at: string
-          currency: string
-          features: Json
-          highlighted: boolean
-          id: string
-          is_demo: boolean
-          max_employees: number | null
-          name: string
-          price_monthly: number | null
-          slug: string
-          sort_order: number
-          tagline: string | null
-          updated_at: string
-        }
-        Insert: {
-          active?: boolean
-          created_at?: string
-          currency?: string
-          features?: Json
-          highlighted?: boolean
-          id?: string
-          is_demo?: boolean
-          max_employees?: number | null
-          name: string
-          price_monthly?: number | null
-          slug: string
-          sort_order?: number
-          tagline?: string | null
-          updated_at?: string
-        }
-        Update: {
-          active?: boolean
-          created_at?: string
-          currency?: string
-          features?: Json
-          highlighted?: boolean
-          id?: string
-          is_demo?: boolean
-          max_employees?: number | null
-          name?: string
-          price_monthly?: number | null
-          slug?: string
-          sort_order?: number
-          tagline?: string | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      demo_requests: {
-        Row: {
-          access_token: string | null
-          company_description: string
-          company_name: string
-          contact_email: string
-          contact_name: string
-          contact_phone: string | null
-          created_at: string
-          id: string
-          rejection_reason: string | null
-          reviewed_at: string | null
-          reviewed_by: string | null
-          status: Database["public"]["Enums"]["demo_request_status"]
-          token_redeemed_at: string | null
-          updated_at: string
-        }
-        Insert: {
-          access_token?: string | null
-          company_description: string
-          company_name: string
-          contact_email: string
-          contact_name: string
-          contact_phone?: string | null
-          created_at?: string
-          id?: string
-          rejection_reason?: string | null
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          status?: Database["public"]["Enums"]["demo_request_status"]
-          token_redeemed_at?: string | null
-          updated_at?: string
-        }
-        Update: {
-          access_token?: string | null
-          company_description?: string
-          company_name?: string
-          contact_email?: string
-          contact_name?: string
-          contact_phone?: string | null
-          created_at?: string
-          id?: string
-          rejection_reason?: string | null
-          reviewed_at?: string | null
-          reviewed_by?: string | null
-          status?: Database["public"]["Enums"]["demo_request_status"]
-          token_redeemed_at?: string | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
     }
     Views: {
       [_ in never]: never
@@ -1132,21 +1030,12 @@ export type Database = {
         Returns: boolean
       }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
-      check_demo_access_token: {
-        Args: { _token: string; _email: string }
-        Returns: boolean
-      }
-      redeem_demo_access_token: {
-        Args: { _token: string; _email: string }
-        Returns: boolean
-      }
     }
     Enums: {
       action_status: "todo" | "in_progress" | "done" | "blocked"
       alert_severity: "low" | "medium" | "high" | "critical"
       alert_status: "open" | "acknowledged" | "resolved"
       app_role: "super_admin" | "hr_admin" | "manager" | "employee"
-      demo_request_status: "pending" | "approved" | "rejected"
       employee_status: "active" | "on_leave" | "inactive"
       question_type: "likert5" | "mcq" | "text"
       survey_methodology: "karasek" | "copsoq" | "custom"
