@@ -19,6 +19,9 @@ function EmployeeLayout() {
     if (!user) { navigate({ to: "/auth", replace: true }); return; }
     if (spaceLoading) return;
     if (!info?.spaceId) { navigate({ to: "/onboarding", replace: true }); return; }
+    if (!info.roles.includes("employee")) {
+      navigate({ to: "/admin/dashboard", replace: true });
+    }
   }, [user, loading, info, spaceLoading, navigate]);
 
   if (loading || spaceLoading || !user || !info?.spaceId) {

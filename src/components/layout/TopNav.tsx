@@ -48,21 +48,7 @@ export function TopNav() {
         </div>
       </Link>
 
-      {isAdminUser && (
-        <div className="hidden md:flex items-center bg-muted rounded-full p-1 relative">
-          {(["admin", "employee"] as const).map((r) => {
-            const active = role === r;
-            return (
-              <button key={r} onClick={() => handleRoleChange(r)} className="relative px-4 py-1.5 text-xs font-medium rounded-full transition-colors z-10">
-                {active && <motion.span layoutId="role-pill" className="absolute inset-0 gradient-brand rounded-full shadow-elegant" transition={{ type: "spring", stiffness: 400, damping: 30 }} />}
-                <span className={`relative z-10 ${active ? "text-white" : "text-muted-foreground"}`}>
-                  {r === "admin" ? t("hrPortal") : t("employeePortal")}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      )}
+
 
       <div className="flex-1" />
 

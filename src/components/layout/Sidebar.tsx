@@ -41,10 +41,10 @@ const superAdminItems: { to: string; icon: React.ComponentType<{ className?: str
 
 export function Sidebar() {
   const { t, direction, pick } = useI18n();
-  const role = useStore((s) => s.role);
   const { info } = useMySpace();
   const isSuperAdmin = hasRole(info?.roles ?? [], "super_admin");
-  const items = role === "admin" ? adminItems : employeeItems;
+  const isEmployee = hasRole(info?.roles ?? [], "employee");
+  const items = isEmployee ? employeeItems : adminItems;
   const location = useLocation();
 
   return (
