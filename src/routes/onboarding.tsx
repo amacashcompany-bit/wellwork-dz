@@ -22,7 +22,7 @@ function OnboardingPage() {
   const [mode, setMode] = useState<"choose" | "create" | "join">("choose");
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
-  const [spaceKey, setSpaceKey] = useState("");
+  const [inviteCode, setInviteCode] = useState("");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -30,7 +30,7 @@ function OnboardingPage() {
     if (!user) { navigate({ to: "/auth", replace: true }); return; }
     if (spaceLoading) return;
     if (info?.spaceId) {
-      const isAdmin = info.roles.includes("hr_admin") || info.roles.includes("super_admin");
+      const isAdmin = info.roles.includes("hr_admin") || info.roles.includes("super_admin") || info.roles.includes("manager");
       navigate({ to: isAdmin ? "/admin/dashboard" : "/employee/home", replace: true });
     }
   }, [authLoading, spaceLoading, user, info, navigate]);
@@ -45,24 +45,21 @@ function OnboardingPage() {
     await supabase.from("user_roles").insert({ user_id: user.id, space_id: space.id, role: "hr_admin" });
     await supabase.from("profiles").upsert({ id: user.id, current_space_id: space.id });
     setBusy(false);
-    toast.success("Espace créé");
+    toast.success("Espace créé — vous êtes administrateur RH");
     refetch();
     navigate({ to: "/admin/dashboard", replace: true });
   };
 
-  const joinSpace = async () => {
-    if (!user || !spaceKey.trim()) return;
+  const joinWithCode = async () => {
+    if (!user || !inviteCode.trim()) return;
     setBusy(true);
-    const { data: space, error } = await supabase.from("spaces").select("id, name").eq("space_key", spaceKey.trim()).maybeSingle();
-    if (error || !space) { setBusy(false); return toast.error("Clé d'espace invalide"); }
-    const { error: memErr } = await supabase.from("space_members").insert({ space_id: space.id, user_id: user.id });
-    if (memErr && !memErr.message.includes("duplicate")) { setBusy(false); return toast.error(memErr.message); }
-    await supabase.from("user_roles").insert({ user_id: user.id, space_id: space.id, role: "employee" }).select();
-    await supabase.from("profiles").upsert({ id: user.id, current_space_id: space.id });
+    const { data, error } = await supabase.rpc("redeem_space_invite", { _code: inviteCode.trim() });
     setBusy(false);
-    toast.success(`Bienvenue dans ${space.name}`);
+    if (error || !data || !data.length) return toast.error(error?.message || "Code d'invitation invalide ou expiré");
+    const role = data[0].role;
+    toast.success("Bienvenue dans votre espace");
     refetch();
-    navigate({ to: "/employee/home", replace: true });
+    navigate({ to: role === "employee" ? "/employee/home" : "/admin/dashboard", replace: true });
   };
 
   if (authLoading || spaceLoading) {
@@ -82,17 +79,17 @@ function OnboardingPage() {
         {mode === "choose" && (
           <Card className="p-8 rounded-3xl glass-dark border-white/10 text-white">
             <h1 className="text-2xl font-bold text-center mb-2">Bienvenue{user?.email ? `, ${user.email.split("@")[0]}` : ""}</h1>
-            <p className="text-white/60 text-sm text-center mb-8">Rejoignez un espace existant ou créez celui de votre organisation.</p>
+            <p className="text-white/60 text-sm text-center mb-8">Rejoignez votre organisation avec un code, ou créez un espace pour votre entreprise.</p>
             <div className="grid md:grid-cols-2 gap-4">
               <button onClick={() => setMode("join")} className="text-left p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-brand hover:bg-white/10 transition-all">
                 <KeyRound className="w-6 h-6 mb-3 text-brand" />
-                <div className="font-semibold">Rejoindre un espace</div>
-                <div className="text-xs text-white/60 mt-1">Vous avez une clé d'invitation de votre RH.</div>
+                <div className="font-semibold">J'ai un code d'invitation</div>
+                <div className="text-xs text-white/60 mt-1">Salarié ou manager invité par votre entreprise.</div>
               </button>
               <button onClick={() => setMode("create")} className="text-left p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-brand hover:bg-white/10 transition-all">
                 <Plus className="w-6 h-6 mb-3 text-brand" />
-                <div className="font-semibold">Créer un espace</div>
-                <div className="text-xs text-white/60 mt-1">Devenez administrateur RH d'un nouvel espace.</div>
+                <div className="font-semibold">Créer un espace entreprise</div>
+                <div className="text-xs text-white/60 mt-1">Vous êtes RH ou dirigeant — administrez votre organisation.</div>
               </button>
             </div>
             <div className="mt-6 text-center">
@@ -103,14 +100,14 @@ function OnboardingPage() {
 
         {mode === "create" && (
           <Card className="p-8 rounded-3xl glass-dark border-white/10 text-white">
-            <div className="flex items-center gap-3 mb-6"><Building2 className="w-6 h-6 text-brand" /><h1 className="text-xl font-bold">Créer votre espace</h1></div>
+            <div className="flex items-center gap-3 mb-6"><Building2 className="w-6 h-6 text-brand" /><h1 className="text-xl font-bold">Créer votre espace entreprise</h1></div>
             <div className="space-y-4">
               <div><Label className="text-white/80">Nom de l'organisation</Label>
                 <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex. TechDZ" className="mt-1 bg-white/5 border-white/10 text-white" />
               </div>
               <div><Label className="text-white/80">Identifiant unique (slug)</Label>
                 <Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="tech-dz" className="mt-1 bg-white/5 border-white/10 text-white" />
-                <div className="text-[11px] text-white/40 mt-1">Utilisé pour identifier votre espace. Auto-généré à partir du nom.</div>
+                <div className="text-[11px] text-white/40 mt-1">Auto-généré à partir du nom si vide.</div>
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" onClick={() => setMode("choose")} className="bg-transparent border-white/20 text-white hover:bg-white/10">Retour</Button>
@@ -124,15 +121,15 @@ function OnboardingPage() {
 
         {mode === "join" && (
           <Card className="p-8 rounded-3xl glass-dark border-white/10 text-white">
-            <div className="flex items-center gap-3 mb-6"><KeyRound className="w-6 h-6 text-brand" /><h1 className="text-xl font-bold">Rejoindre un espace</h1></div>
+            <div className="flex items-center gap-3 mb-6"><KeyRound className="w-6 h-6 text-brand" /><h1 className="text-xl font-bold">Rejoindre avec un code</h1></div>
             <div className="space-y-4">
-              <div><Label className="text-white/80">Clé d'invitation</Label>
-                <Input value={spaceKey} onChange={(e) => setSpaceKey(e.target.value)} placeholder="UUID fourni par votre RH" className="mt-1 bg-white/5 border-white/10 text-white font-mono" />
-                <div className="text-[11px] text-white/40 mt-1">Votre RH trouve cette clé dans Paramètres → Espace.</div>
+              <div><Label className="text-white/80">Code d'invitation</Label>
+                <Input value={inviteCode} onChange={(e) => setInviteCode(e.target.value.toUpperCase())} placeholder="Ex. WW-4G7K-9XZ2" className="mt-1 bg-white/5 border-white/10 text-white font-mono tracking-wider" />
+                <div className="text-[11px] text-white/40 mt-1">Code unique reçu de votre RH ou manager.</div>
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" onClick={() => setMode("choose")} className="bg-transparent border-white/20 text-white hover:bg-white/10">Retour</Button>
-                <Button onClick={joinSpace} disabled={busy || !spaceKey.trim()} className="flex-1 gradient-brand border-0 h-11">
+                <Button onClick={joinWithCode} disabled={busy || !inviteCode.trim()} className="flex-1 gradient-brand border-0 h-11">
                   {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : "Rejoindre"}
                 </Button>
               </div>

@@ -2,7 +2,7 @@ import { Link, useLocation } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import {
   BarChart3, Bell, BookOpen, Bot, Calendar, HelpCircle, Home, Inbox, LayoutDashboard,
-  Lightbulb, MessageSquare, Plug, ScrollText, Settings, ShieldQuestion, Users, Tag, ClipboardCheck,
+  Lightbulb, MessageSquare, Plug, ScrollText, Settings, ShieldQuestion, Users, UserCog,
 } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
 import { useStore } from "@/store/useStore";
@@ -12,6 +12,7 @@ import type { DictKey } from "@/lib/i18n";
 const adminItems: { to: string; icon: React.ComponentType<{ className?: string }>; key: DictKey; badge?: string }[] = [
   { to: "/admin/dashboard", icon: LayoutDashboard, key: "dashboard" },
   { to: "/admin/employees", icon: Users, key: "employees" },
+  { to: "/admin/team", icon: UserCog, key: "employees" },
   { to: "/admin/surveys", icon: ScrollText, key: "surveys" },
   { to: "/admin/anonymous", icon: ShieldQuestion, key: "anonymousSpace", badge: "3" },
   { to: "/admin/burnout", icon: Bot, key: "burnoutEngine", badge: "!" },
@@ -36,8 +37,6 @@ const employeeItems: { to: string; icon: React.ComponentType<{ className?: strin
 ];
 
 const superAdminItems: { to: string; icon: React.ComponentType<{ className?: string }>; label: [string, string, string] }[] = [
-  { to: "/admin/plans", icon: Tag, label: ["Plans tarifaires", "الخطط التسعيرية", "Pricing plans"] },
-  { to: "/admin/demo-requests", icon: ClipboardCheck, label: ["Demandes de démo", "طلبات العرض التجريبي", "Demo requests"] },
 ];
 
 export function Sidebar() {

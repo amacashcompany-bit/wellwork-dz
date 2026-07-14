@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
-import { Sparkles, ShieldCheck, Loader2, KeyRound } from "lucide-react";
+import { Sparkles, ShieldCheck, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { Button } from "@/components/ui/button";
@@ -24,27 +24,6 @@ function AuthPage() {
   const [tab, setTab] = useState<"signin" | "signup">("signin");
   const [busy, setBusy] = useState(false);
 
-  const [wantsDemo, setWantsDemo] = useState(false);
-  const [demoToken, setDemoToken] = useState("");
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) navigate({ to: "/onboarding", replace: true });
-    });
-  }, [navigate]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const params = new URLSearchParams(window.location.search);
-    const tokenFromUrl = params.get("token");
-    const emailFromUrl = params.get("email");
-    if (tokenFromUrl) {
-      setWantsDemo(true);
-      setDemoToken(tokenFromUrl);
-      setTab("signup");
-    }
-    if (emailFromUrl) setEmail(emailFromUrl);
-  }, []);
 
   const doSignIn = async () => {
     setBusy(true);
@@ -56,48 +35,13 @@ function AuthPage() {
   };
 
   const doSignUp = async () => {
-    if (wantsDemo && !demoToken.trim()) {
-      return toast.error("Merci de saisir votre jeton d'accès démo.");
-    }
-
     setBusy(true);
-
-    if (wantsDemo) {
-      const { data: valid, error: tokenErr } = await supabase.rpc("check_demo_access_token", {
-        _token: demoToken.trim(),
-        _email: email,
-      });
-      if (tokenErr || !valid) {
-        setBusy(false);
-        return toast.error("Jeton d'accès démo invalide pour cet email. Vérifiez le jeton reçu par email ou contactez notre équipe.");
-      }
-    }
-
     const { error } = await supabase.auth.signUp({
       email, password,
-      options: {
-        emailRedirectTo: window.location.origin,
-        data: { full_name: fullName },
-      },
+      options: { emailRedirectTo: window.location.origin, data: { full_name: fullName } },
     });
-    if (error) {
-      setBusy(false);
-      return toast.error(error.message);
-    }
-
-    if (wantsDemo) {
-      const { error: redeemErr } = await supabase.rpc("redeem_demo_access_token", {
-        _token: demoToken.trim(),
-        _email: email,
-      });
-      if (redeemErr) {
-        // Account was created but the token could not be marked as redeemed —
-        // not fatal, the space still gets created via onboarding.
-        console.warn("Demo token redemption failed:", redeemErr.message);
-      }
-    }
-
     setBusy(false);
+    if (error) return toast.error(error.message);
     toast.success("Compte créé");
     navigate({ to: "/onboarding", replace: true });
   };
@@ -154,22 +98,6 @@ function AuthPage() {
               <div><Label className="text-white/80">Mot de passe</Label>
                 <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1 bg-white/5 border-white/10 text-white" />
               </div>
-              <button
-                type="button"
-                onClick={() => setWantsDemo((v) => !v)}
-                className="flex items-center gap-2 text-xs text-white/60 hover:text-white/90 transition"
-              >
-                <KeyRound className="w-3.5 h-3.5" />
-                {wantsDemo ? "J'ai un jeton d'accès démo (cliquer pour masquer)" : "J'ai un jeton d'accès démo approuvé"}
-              </button>
-              {wantsDemo && (
-                <div>
-                  <Label className="text-white/80">Jeton d'accès démo</Label>
-                  <Input value={demoToken} onChange={(e) => setDemoToken(e.target.value)} placeholder="Collez le jeton reçu par email"
-                    className="mt-1 bg-white/5 border-white/10 text-white placeholder:text-white/40 font-mono text-sm" />
-                  <p className="text-[11px] text-white/50 mt-1">Utilisez la même adresse email que celle indiquée lors de votre demande de démo.</p>
-                </div>
-              )}
               <Button onClick={doSignUp} disabled={busy} className="w-full gradient-brand text-white border-0 h-11">
                 {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : "Créer mon compte"}
               </Button>
