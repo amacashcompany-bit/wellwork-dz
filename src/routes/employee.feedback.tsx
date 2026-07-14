@@ -44,8 +44,8 @@ function FeedbackPage() {
     try {
       const key = generateTicketKey();
       const [encSubj, encBody, keyHash] = await Promise.all([
-        encryptWithKey(subject.trim(), key),
-        encryptWithKey(content.trim(), key),
+        encryptWithKey(subject.trim(), info.spaceId),
+        encryptWithKey(content.trim(), info.spaceId),
         sha256Hex(key),
       ]);
       const { error } = await supabase.from("feedback_tickets").insert({

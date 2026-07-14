@@ -34,33 +34,40 @@ function AnonymousPage() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "open" | "resolved">("all");
-  const [keyInput, setKeyInput] = useState<Record<string, string>>({});
   const [decrypted, setDecrypted] = useState<Record<string, { subject: string; body: string }>>({});
-  const [busy, setBusy] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (!info?.spaceId) return;
-    supabase.from("feedback_tickets").select("*").eq("space_id", info.spaceId).order("created_at", { ascending: false })
-      .then(({ data }) => { setTickets((data ?? []) as Ticket[]); setLoading(false); });
+    (async () => {
+      setLoading(true);
+      const { data } = await supabase
+        .from("feedback_tickets")
+        .select("*")
+        .eq("space_id", info.spaceId)
+        .order("created_at", { ascending: false });
+      
+      const ticketRows = (data ?? []) as Ticket[];
+      setTickets(ticketRows);
+
+      const decMap: Record<string, { subject: string; body: string }> = {};
+      await Promise.all(
+        ticketRows.map(async (t) => {
+          const [subject, body] = await Promise.all([
+            decryptWithKey(t.encrypted_subject, info.spaceId!),
+            decryptWithKey(t.encrypted_content, info.spaceId!),
+          ]);
+          decMap[t.id] = { 
+            subject: subject || "Contenu illisible (chiffrement hérité)", 
+            body: body || "Ce message a été chiffré avec une ancienne clé de suivi." 
+          };
+        })
+      );
+      setDecrypted(decMap);
+      setLoading(false);
+    })();
   }, [info?.spaceId]);
 
   const filtered = tickets.filter((t) => filter === "all" || t.status === filter);
-
-  const decrypt = async (t: Ticket) => {
-    const raw = keyInput[t.id]?.trim();
-    if (!raw) return toast.error("Clé requise");
-    setBusy((b) => ({ ...b, [t.id]: true }));
-    try {
-      const hash = await sha256Hex(raw);
-      const row = await supabase.from("feedback_tickets").select("ticket_key_hash").eq("id", t.id).maybeSingle();
-      if (row.data?.ticket_key_hash !== hash) { toast.error("Clé invalide"); return; }
-      const [subject, body] = await Promise.all([
-        decryptWithKey(t.encrypted_subject, raw),
-        decryptWithKey(t.encrypted_content, raw),
-      ]);
-      setDecrypted((d) => ({ ...d, [t.id]: { subject, body } }));
-    } finally { setBusy((b) => ({ ...b, [t.id]: false })); }
-  };
 
   const updateStatus = async (id: string, status: "open" | "under_review" | "resolved" | "closed") => {
     const { error } = await supabase.from("feedback_tickets").update({ status }).eq("id", id);
@@ -73,7 +80,7 @@ function AnonymousPage() {
     <div>
       <PageHeader
         title={pick("Espace anonyme — modération RH", "الفضاء المجهول — الإدارة", "Anonymous Space — HR")}
-        subtitle={pick("Signalements chiffrés. Chaque ticket nécessite la clé de suivi du déclarant pour être déchiffré.", "بلاغات مشفرة. كل تذكرة تتطلب مفتاح المُبلِّغ.", "Encrypted reports. Each ticket needs the reporter's tracking key to decrypt.")}
+        subtitle={pick("Signalements chiffrés par espace. Tous les messages sont déchiffrés automatiquement pour votre espace de travail.", "بلاغات مشفرة حسب الفضاء. يتم فك تشفير جميع الرسائل تلقائياً لمساحة عملك.", "Space-encrypted reports. All messages are automatically decrypted for your workspace.")}
       />
 
       <Tabs value={filter} onValueChange={(v) => setFilter(v as typeof filter)} className="mb-4">
@@ -110,24 +117,10 @@ function AnonymousPage() {
                     <div className="text-xs text-muted-foreground shrink-0">{new Date(t.created_at).toLocaleDateString()}</div>
                   </div>
 
-                  {dec ? (
-                    <>
-                      <div className="font-semibold text-sm mb-1">{dec.subject}</div>
-                      <p className="text-sm leading-relaxed whitespace-pre-line text-foreground/90">{dec.body}</p>
-                    </>
-                  ) : (
-                    <div className="rounded-xl bg-muted/50 border p-4">
-                      <div className="text-xs text-muted-foreground mb-2 flex items-center gap-1.5">
-                        <KeyRound className="w-3.5 h-3.5" /> Contenu chiffré · saisissez la clé fournie par le déclarant
-                      </div>
-                      <div className="flex gap-2">
-                        <Input value={keyInput[t.id] ?? ""} onChange={(e) => setKeyInput((k) => ({ ...k, [t.id]: e.target.value }))} placeholder="WW-XXXXXXXX" className="rounded-xl font-mono text-sm" />
-                        <Button onClick={() => decrypt(t)} disabled={busy[t.id]} variant="outline">
-                          {busy[t.id] ? <Loader2 className="w-4 h-4 animate-spin" /> : "Déchiffrer"}
-                        </Button>
-                      </div>
-                    </div>
-                  )}
+                  <div className="mt-2">
+                    <div className="font-semibold text-sm mb-1">{dec?.subject || "Chargement..."}</div>
+                    <p className="text-sm leading-relaxed whitespace-pre-line text-foreground/90">{dec?.body || "Déchiffrement en cours..."}</p>
+                  </div>
 
                   <div className="mt-4 flex items-center gap-2">
                     {t.status !== "under_review" && <Button size="sm" variant="outline" onClick={() => updateStatus(t.id, "under_review")}>En cours</Button>}
