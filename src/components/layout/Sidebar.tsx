@@ -12,6 +12,8 @@ import type { DictKey } from "@/lib/i18n";
 const adminItems: { to: string; icon: React.ComponentType<{ className?: string }>; key: DictKey; badge?: string }[] = [
   { to: "/admin/dashboard", icon: LayoutDashboard, key: "dashboard" },
   { to: "/admin/employees", icon: Users, key: "employees" },
+  { to: "/admin/team", icon: UserCog, key: "employees" },
+  { to: "/admin/invites", icon: Send, key: "employees" },
   { to: "/admin/surveys", icon: ScrollText, key: "surveys" },
   { to: "/admin/anonymous", icon: ShieldQuestion, key: "anonymousSpace", badge: "3" },
   { to: "/admin/burnout", icon: Bot, key: "burnoutEngine", badge: "!" },
