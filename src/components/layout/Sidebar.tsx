@@ -2,7 +2,7 @@ import { Link, useLocation } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import {
   BarChart3, Bell, BookOpen, Bot, Calendar, HelpCircle, Home, Inbox, LayoutDashboard,
-  Lightbulb, MessageSquare, Plug, ScrollText, Settings, ShieldQuestion, Users, Tag, ClipboardCheck,
+  Lightbulb, MessageSquare, Plug, ScrollText, Settings, ShieldQuestion, Users, UserCog, Send,
 } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
 import { useStore } from "@/store/useStore";
