@@ -42,8 +42,15 @@ function OnboardingPage() {
     if (authLoading) return;
     if (!user) { navigate({ to: "/auth", replace: true }); return; }
     if (spaceLoading) return;
+    
+    // Redirect super admin directly
+    if (info?.roles.includes("super_admin")) {
+      navigate({ to: "/superadmin", replace: true });
+      return;
+    }
+
     if (info?.spaceId) {
-      const isAdmin = info.roles.includes("hr_admin") || info.roles.includes("super_admin") || info.roles.includes("manager");
+      const isAdmin = info.roles.includes("hr_admin") || info.roles.includes("manager");
       navigate({ to: isAdmin ? "/admin/dashboard" : "/employee/home", replace: true });
     }
   }, [authLoading, spaceLoading, user, info, navigate]);

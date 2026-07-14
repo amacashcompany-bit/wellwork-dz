@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { Bell, Building2, LogOut, Moon, ShieldCheck, Sun, User } from "lucide-react";
 import logoMark from "@/assets/brand/wellwork-logo-mark.png";
@@ -15,6 +15,7 @@ import { LANGS } from "@/lib/i18n";
 
 export function TopNav() {
   const { t, language, setLanguage } = useI18n();
+  const navigate = useNavigate();
   const role = useStore((s) => s.role);
   const setRole = useStore((s) => s.setRole);
   const isDark = useStore((s) => s.isDarkMode);
@@ -23,6 +24,11 @@ export function TopNav() {
   const { user, signOut } = useAuth();
   const { info } = useMySpace();
   const isAdminUser = info ? hasRole(info.roles, ["hr_admin", "super_admin", "manager"]) : false;
+
+  const handleRoleChange = (r: "admin" | "employee") => {
+    setRole(r);
+    navigate({ to: r === "admin" ? "/admin/dashboard" : "/employee/home", replace: true });
+  };
 
   return (
     <header className="fixed top-0 inset-x-0 z-50 h-16 glass border-b flex items-center px-4 md:px-6 gap-3">
@@ -47,7 +53,7 @@ export function TopNav() {
           {(["admin", "employee"] as const).map((r) => {
             const active = role === r;
             return (
-              <button key={r} onClick={() => setRole(r)} className="relative px-4 py-1.5 text-xs font-medium rounded-full transition-colors z-10">
+              <button key={r} onClick={() => handleRoleChange(r)} className="relative px-4 py-1.5 text-xs font-medium rounded-full transition-colors z-10">
                 {active && <motion.span layoutId="role-pill" className="absolute inset-0 gradient-brand rounded-full shadow-elegant" transition={{ type: "spring", stiffness: 400, damping: 30 }} />}
                 <span className={`relative z-10 ${active ? "text-white" : "text-muted-foreground"}`}>
                   {r === "admin" ? t("hrPortal") : t("employeePortal")}
