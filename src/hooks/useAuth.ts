@@ -59,12 +59,21 @@ export function useMySpace(): { info: MySpaceInfo | null; loading: boolean; refe
         if (spaceId) await supabase.from("profiles").upsert({ id: uid, current_space_id: spaceId });
       }
 
-      if (!spaceId) { if (mounted) { setInfo({ spaceId: null, spaceName: null, spaceSlug: null, roles: [] }); setLoading(false); } return; }
+      if (!spaceId) {
+        const { data: roleRows } = await supabase.from("user_roles").select("role").eq("user_id", uid).is("space_id", null);
+        if (!mounted) return;
+        setInfo({
+          spaceId: null,
+          spaceName: null,
+          spaceSlug: null,
+          roles: (roleRows ?? []).map((r) => r.role as AppRole),
+        });
+        setLoading(false);
+        return;
+      }
 
       const [{ data: space }, { data: roleRows }] = await Promise.all([
         supabase.from("spaces").select("id, name, slug").eq("id", spaceId).maybeSingle(),
-        // super_admin is a global role stored with space_id = NULL, so it must be
-        // included alongside this space's roles or super admins never pass hasRole checks.
         supabase.from("user_roles").select("role").eq("user_id", uid).or(`space_id.eq.${spaceId},space_id.is.null`),
       ]);
 
