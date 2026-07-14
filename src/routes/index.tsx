@@ -349,7 +349,11 @@ function Landing() {
 }
 
 function PricingSection() {
-  const { plans, loading } = usePlans();
+  const plans = [
+    { name: "Starter", tagline: "Pour découvrir la plateforme", price: "Gratuit", features: ["Jusqu'à 25 employés", "1 enquête active", "Support communautaire"], highlighted: false, cta: "Créer mon espace" },
+    { name: "Business", tagline: "Pour les PME en croissance", price: "Sur devis", features: ["Employés illimités", "Managers & permissions", "Enquêtes anonymes k≥5", "IA burn-out", "Support prioritaire"], highlighted: true, cta: "Créer mon espace" },
+    { name: "Enterprise", tagline: "Grands comptes & multi-sites", price: "Sur devis", features: ["Multi-espaces", "SSO SAML", "Intégrations ERP", "Success manager dédié"], highlighted: false, cta: "Nous contacter" },
+  ];
 
   return (
     <section id="pricing" className="py-24 px-6 bg-muted/30">
@@ -357,61 +361,41 @@ function PricingSection() {
         <div className="text-center max-w-2xl mx-auto mb-14">
           <Badge variant="secondary" className="mb-4">Tarifs</Badge>
           <h2 className="text-3xl md:text-5xl font-bold font-display tracking-tight">Un plan pour chaque étape de votre croissance.</h2>
-          <p className="mt-4 text-muted-foreground">Commencez avec une démo, évoluez sans friction. Aucune carte bancaire requise pour tester.</p>
+          <p className="mt-4 text-muted-foreground">Commencez gratuitement, évoluez sans friction.</p>
         </div>
-
-        {loading ? (
-          <div className="text-center text-muted-foreground text-sm">Chargement des plans…</div>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
-            {plans.map((plan, i) => (
-              <motion.div key={plan.id} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.06 }}>
-                <div className={`h-full p-6 rounded-3xl border bg-card flex flex-col relative ${plan.highlighted ? "border-brand shadow-glow ring-1 ring-brand/30" : ""}`}>
-                  {plan.highlighted && (
-                    <span className="absolute -top-3 start-6 text-[11px] font-semibold px-3 py-1 rounded-full gradient-brand text-white">Le plus populaire</span>
-                  )}
-                  <div className="font-display font-semibold text-lg">{plan.name}</div>
-                  {plan.tagline && <p className="text-sm text-muted-foreground mt-1">{plan.tagline}</p>}
-                  <div className="mt-5">
-                    {plan.price_monthly == null ? (
-                      <div className="text-2xl font-bold">Sur devis</div>
-                    ) : plan.price_monthly === 0 ? (
-                      <div className="text-2xl font-bold">Gratuit</div>
-                    ) : (
-                      <div className="text-2xl font-bold">{plan.price_monthly}€ <span className="text-sm font-normal text-muted-foreground">/mois</span></div>
-                    )}
-                  </div>
-                  <ul className="mt-5 space-y-2.5 text-sm flex-1">
-                    {((plan.features as string[]) ?? []).map((f, idx) => (
-                      <li key={idx} className="flex items-start gap-2">
-                        <Check className="w-4 h-4 text-leaf mt-0.5 shrink-0" /> <span className="text-muted-foreground">{f}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="mt-6">
-                    {plan.is_demo ? (
-                      <DemoRequestDialog trigger={
-                        <Button className="w-full rounded-full" variant={plan.highlighted ? "default" : "outline"}>
-                          Demander l'accès
-                        </Button>
-                      } />
-                    ) : (
-                      <Link to="/auth">
-                        <Button className={`w-full rounded-full ${plan.highlighted ? "gradient-brand text-white border-0" : ""}`} variant={plan.highlighted ? "default" : "outline"}>
-                          Créer mon espace
-                        </Button>
-                      </Link>
-                    )}
-                  </div>
+        <div className="grid md:grid-cols-3 gap-5">
+          {plans.map((plan, i) => (
+            <motion.div key={plan.name} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.06 }}>
+              <div className={`h-full p-6 rounded-3xl border bg-card flex flex-col relative ${plan.highlighted ? "border-brand shadow-glow ring-1 ring-brand/30" : ""}`}>
+                {plan.highlighted && (
+                  <span className="absolute -top-3 start-6 text-[11px] font-semibold px-3 py-1 rounded-full gradient-brand text-white">Le plus populaire</span>
+                )}
+                <div className="font-display font-semibold text-lg">{plan.name}</div>
+                <p className="text-sm text-muted-foreground mt-1">{plan.tagline}</p>
+                <div className="mt-5 text-2xl font-bold">{plan.price}</div>
+                <ul className="mt-5 space-y-2.5 text-sm flex-1">
+                  {plan.features.map((f, idx) => (
+                    <li key={idx} className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-leaf mt-0.5 shrink-0" /> <span className="text-muted-foreground">{f}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-6">
+                  <Link to="/auth">
+                    <Button className={`w-full rounded-full ${plan.highlighted ? "gradient-brand text-white border-0" : ""}`} variant={plan.highlighted ? "default" : "outline"}>
+                      {plan.cta}
+                    </Button>
+                  </Link>
                 </div>
-              </motion.div>
-            ))}
-          </div>
-        )}
+              </div>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   );
 }
+
 
 function Legend({ color, label }: { color: string; label: string }) {
   return (
