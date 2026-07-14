@@ -8,8 +8,6 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { usePlans } from "@/hooks/usePlans";
-import { DemoRequestDialog } from "@/components/DemoRequestDialog";
 import logoMark from "@/assets/brand/wellwork-logo-mark.png";
 import wordmark from "@/assets/brand/wellwork-wordmark.png";
 import heroTeam from "@/assets/hero-team.jpg";
