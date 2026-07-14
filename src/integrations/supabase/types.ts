@@ -515,6 +515,38 @@ export type Database = {
           },
         ]
       }
+      manager_permissions: {
+        Row: {
+          created_at: string
+          id: string
+          module: string
+          space_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          module: string
+          space_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          module?: string
+          space_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manager_permissions_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "spaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       message_reads: {
         Row: {
           message_id: string
@@ -611,6 +643,69 @@ export type Database = {
           {
             foreignKeyName: "profiles_current_space_id_fkey"
             columns: ["current_space_id"]
+            isOneToOne: false
+            referencedRelation: "spaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      space_invites: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string
+          department_id: string | null
+          email: string | null
+          expires_at: string | null
+          full_name: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          space_id: string
+          updated_at: string
+          used_at: string | null
+          used_by: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by: string
+          department_id?: string | null
+          email?: string | null
+          expires_at?: string | null
+          full_name?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          space_id: string
+          updated_at?: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string
+          department_id?: string | null
+          email?: string | null
+          expires_at?: string | null
+          full_name?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          space_id?: string
+          updated_at?: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "space_invites_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "space_invites_space_id_fkey"
+            columns: ["space_id"]
             isOneToOne: false
             referencedRelation: "spaces"
             referencedColumns: ["id"]
@@ -1017,6 +1112,10 @@ export type Database = {
     }
     Functions: {
       current_space_id: { Args: never; Returns: string }
+      has_manager_permission: {
+        Args: { _module: string; _space_id: string; _user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1030,6 +1129,13 @@ export type Database = {
         Returns: boolean
       }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
+      redeem_space_invite: {
+        Args: { _code: string }
+        Returns: {
+          role: Database["public"]["Enums"]["app_role"]
+          space_id: string
+        }[]
+      }
     }
     Enums: {
       action_status: "todo" | "in_progress" | "done" | "blocked"
