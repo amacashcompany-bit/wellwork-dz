@@ -9,11 +9,13 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SuperadminRouteImport } from './routes/superadmin'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as EmployeeRouteImport } from './routes/employee'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SuperadminIndexRouteImport } from './routes/superadmin.index'
 import { Route as EmployeeIndexRouteImport } from './routes/employee.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as EmployeeSurveysRouteImport } from './routes/employee.surveys'
@@ -38,6 +40,11 @@ import { Route as AdminAnonymousRouteImport } from './routes/admin.anonymous'
 import { Route as AdminAlertsRouteImport } from './routes/admin.alerts'
 import { Route as AdminActionsRouteImport } from './routes/admin.actions'
 
+const SuperadminRoute = SuperadminRouteImport.update({
+  id: '/superadmin',
+  path: '/superadmin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
@@ -62,6 +69,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const SuperadminIndexRoute = SuperadminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SuperadminRoute,
 } as any)
 const EmployeeIndexRoute = EmployeeIndexRouteImport.update({
   id: '/',
@@ -185,6 +197,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/employee': typeof EmployeeRouteWithChildren
   '/onboarding': typeof OnboardingRoute
+  '/superadmin': typeof SuperadminRouteWithChildren
   '/admin/actions': typeof AdminActionsRoute
   '/admin/alerts': typeof AdminAlertsRoute
   '/admin/anonymous': typeof AdminAnonymousRoute
@@ -208,6 +221,7 @@ export interface FileRoutesByFullPath {
   '/employee/surveys': typeof EmployeeSurveysRoute
   '/admin/': typeof AdminIndexRoute
   '/employee/': typeof EmployeeIndexRoute
+  '/superadmin/': typeof SuperadminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -236,6 +250,7 @@ export interface FileRoutesByTo {
   '/employee/surveys': typeof EmployeeSurveysRoute
   '/admin': typeof AdminIndexRoute
   '/employee': typeof EmployeeIndexRoute
+  '/superadmin': typeof SuperadminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -244,6 +259,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/employee': typeof EmployeeRouteWithChildren
   '/onboarding': typeof OnboardingRoute
+  '/superadmin': typeof SuperadminRouteWithChildren
   '/admin/actions': typeof AdminActionsRoute
   '/admin/alerts': typeof AdminAlertsRoute
   '/admin/anonymous': typeof AdminAnonymousRoute
@@ -267,6 +283,7 @@ export interface FileRoutesById {
   '/employee/surveys': typeof EmployeeSurveysRoute
   '/admin/': typeof AdminIndexRoute
   '/employee/': typeof EmployeeIndexRoute
+  '/superadmin/': typeof SuperadminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -276,6 +293,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/employee'
     | '/onboarding'
+    | '/superadmin'
     | '/admin/actions'
     | '/admin/alerts'
     | '/admin/anonymous'
@@ -299,6 +317,7 @@ export interface FileRouteTypes {
     | '/employee/surveys'
     | '/admin/'
     | '/employee/'
+    | '/superadmin/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -327,6 +346,7 @@ export interface FileRouteTypes {
     | '/employee/surveys'
     | '/admin'
     | '/employee'
+    | '/superadmin'
   id:
     | '__root__'
     | '/'
@@ -334,6 +354,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/employee'
     | '/onboarding'
+    | '/superadmin'
     | '/admin/actions'
     | '/admin/alerts'
     | '/admin/anonymous'
@@ -357,6 +378,7 @@ export interface FileRouteTypes {
     | '/employee/surveys'
     | '/admin/'
     | '/employee/'
+    | '/superadmin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -365,10 +387,18 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   EmployeeRoute: typeof EmployeeRouteWithChildren
   OnboardingRoute: typeof OnboardingRoute
+  SuperadminRoute: typeof SuperadminRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/superadmin': {
+      id: '/superadmin'
+      path: '/superadmin'
+      fullPath: '/superadmin'
+      preLoaderRoute: typeof SuperadminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/onboarding': {
       id: '/onboarding'
       path: '/onboarding'
@@ -403,6 +433,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/superadmin/': {
+      id: '/superadmin/'
+      path: '/'
+      fullPath: '/superadmin/'
+      preLoaderRoute: typeof SuperadminIndexRouteImport
+      parentRoute: typeof SuperadminRoute
     }
     '/employee/': {
       id: '/employee/'
@@ -632,13 +669,36 @@ const EmployeeRouteWithChildren = EmployeeRoute._addFileChildren(
   EmployeeRouteChildren,
 )
 
+interface SuperadminRouteChildren {
+  SuperadminIndexRoute: typeof SuperadminIndexRoute
+}
+
+const SuperadminRouteChildren: SuperadminRouteChildren = {
+  SuperadminIndexRoute: SuperadminIndexRoute,
+}
+
+const SuperadminRouteWithChildren = SuperadminRoute._addFileChildren(
+  SuperadminRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRoute,
   EmployeeRoute: EmployeeRouteWithChildren,
   OnboardingRoute: OnboardingRoute,
+  SuperadminRoute: SuperadminRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

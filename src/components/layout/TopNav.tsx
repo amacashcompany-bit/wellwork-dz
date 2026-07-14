@@ -111,6 +111,9 @@ export function TopNav() {
           <DropdownMenuSeparator />
           <DropdownMenuItem>{t("profile")}</DropdownMenuItem>
           <DropdownMenuItem asChild><Link to="/admin/settings">{t("settings")}</Link></DropdownMenuItem>
+          {info && hasRole(info.roles, "super_admin") && (
+            <DropdownMenuItem asChild className="text-brand font-medium"><Link to="/superadmin">Master Admin</Link></DropdownMenuItem>
+          )}
           <DropdownMenuSeparator />
           <DropdownMenuItem className="text-danger" onClick={signOut}>
             <LogOut className="w-3.5 h-3.5 me-2" /> {t("logout")}
