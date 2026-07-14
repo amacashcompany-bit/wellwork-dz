@@ -23,6 +23,7 @@ import { Route as EmployeeHomeRouteImport } from './routes/employee.home'
 import { Route as EmployeeHelpRouteImport } from './routes/employee.help'
 import { Route as EmployeeFeedbackRouteImport } from './routes/employee.feedback'
 import { Route as EmployeeEventsRouteImport } from './routes/employee.events'
+import { Route as AdminTeamRouteImport } from './routes/admin.team'
 import { Route as AdminSurveysRouteImport } from './routes/admin.surveys'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminReportsRouteImport } from './routes/admin.reports'
@@ -106,6 +107,11 @@ const EmployeeEventsRoute = EmployeeEventsRouteImport.update({
   id: '/events',
   path: '/events',
   getParentRoute: () => EmployeeRoute,
+} as any)
+const AdminTeamRoute = AdminTeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AdminSurveysRoute = AdminSurveysRouteImport.update({
   id: '/surveys',
@@ -192,6 +198,7 @@ export interface FileRoutesByFullPath {
   '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/surveys': typeof AdminSurveysRoute
+  '/admin/team': typeof AdminTeamRoute
   '/employee/events': typeof EmployeeEventsRoute
   '/employee/feedback': typeof EmployeeFeedbackRoute
   '/employee/help': typeof EmployeeHelpRoute
@@ -219,6 +226,7 @@ export interface FileRoutesByTo {
   '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/surveys': typeof AdminSurveysRoute
+  '/admin/team': typeof AdminTeamRoute
   '/employee/events': typeof EmployeeEventsRoute
   '/employee/feedback': typeof EmployeeFeedbackRoute
   '/employee/help': typeof EmployeeHelpRoute
@@ -249,6 +257,7 @@ export interface FileRoutesById {
   '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/surveys': typeof AdminSurveysRoute
+  '/admin/team': typeof AdminTeamRoute
   '/employee/events': typeof EmployeeEventsRoute
   '/employee/feedback': typeof EmployeeFeedbackRoute
   '/employee/help': typeof EmployeeHelpRoute
@@ -280,6 +289,7 @@ export interface FileRouteTypes {
     | '/admin/reports'
     | '/admin/settings'
     | '/admin/surveys'
+    | '/admin/team'
     | '/employee/events'
     | '/employee/feedback'
     | '/employee/help'
@@ -307,6 +317,7 @@ export interface FileRouteTypes {
     | '/admin/reports'
     | '/admin/settings'
     | '/admin/surveys'
+    | '/admin/team'
     | '/employee/events'
     | '/employee/feedback'
     | '/employee/help'
@@ -336,6 +347,7 @@ export interface FileRouteTypes {
     | '/admin/reports'
     | '/admin/settings'
     | '/admin/surveys'
+    | '/admin/team'
     | '/employee/events'
     | '/employee/feedback'
     | '/employee/help'
@@ -455,6 +467,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EmployeeEventsRouteImport
       parentRoute: typeof EmployeeRoute
     }
+    '/admin/team': {
+      id: '/admin/team'
+      path: '/team'
+      fullPath: '/admin/team'
+      preLoaderRoute: typeof AdminTeamRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/surveys': {
       id: '/admin/surveys'
       path: '/surveys'
@@ -563,6 +582,7 @@ interface AdminRouteChildren {
   AdminReportsRoute: typeof AdminReportsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminSurveysRoute: typeof AdminSurveysRoute
+  AdminTeamRoute: typeof AdminTeamRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -580,6 +600,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminReportsRoute: AdminReportsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminSurveysRoute: AdminSurveysRoute,
+  AdminTeamRoute: AdminTeamRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
