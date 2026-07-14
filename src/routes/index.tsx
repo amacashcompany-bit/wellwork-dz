@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   ArrowRight, ArrowUpRight, ShieldCheck, Sparkles, Users, Bot, ChartLine, Zap,
@@ -28,12 +28,13 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
-  const navigate = useNavigate();
+  const [user, setUser] = useState<any>(null);
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user) navigate({ to: "/onboarding", replace: true });
+      setUser(data.user);
     });
-  }, [navigate]);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden font-sans">
@@ -59,12 +60,22 @@ function Landing() {
             <a href="#pricing" className="hover:text-foreground transition">Tarifs</a>
           </nav>
           <div className="flex items-center gap-2">
-            <Link to="/auth" className="text-sm font-medium hover:text-brand transition-colors hidden sm:inline-flex px-3">Connexion</Link>
-            <Link to="/auth">
-              <Button className="gradient-leaf text-white border-0 h-10 rounded-full px-5 shadow-elegant">
-                Demander une démo <ArrowUpRight className="w-4 h-4 ms-1" />
-              </Button>
-            </Link>
+            {user ? (
+              <Link to="/onboarding">
+                <Button className="gradient-brand text-white border-0 h-10 rounded-full px-5 shadow-elegant">
+                  Tableau de bord
+                </Button>
+              </Link>
+            ) : (
+              <>
+                <Link to="/auth" className="text-sm font-medium hover:text-brand transition-colors hidden sm:inline-flex px-3">Connexion</Link>
+                <Link to="/auth">
+                  <Button className="gradient-leaf text-white border-0 h-10 rounded-full px-5 shadow-elegant">
+                    Demander une démo <ArrowUpRight className="w-4 h-4 ms-1" />
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>

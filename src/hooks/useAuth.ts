@@ -30,7 +30,7 @@ export function useAuth() {
 
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
-    window.location.assign("/");
+    window.location.assign("/auth");
   }, []);
 
   return { user, loading, signOut };
