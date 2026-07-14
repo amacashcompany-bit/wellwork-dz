@@ -36,8 +36,6 @@ const employeeItems: { to: string; icon: React.ComponentType<{ className?: strin
 ];
 
 const superAdminItems: { to: string; icon: React.ComponentType<{ className?: string }>; label: [string, string, string] }[] = [
-  { to: "/admin/plans", icon: Tag, label: ["Plans tarifaires", "الخطط التسعيرية", "Pricing plans"] },
-  { to: "/admin/demo-requests", icon: ClipboardCheck, label: ["Demandes de démo", "طلبات العرض التجريبي", "Demo requests"] },
 ];
 
 export function Sidebar() {
