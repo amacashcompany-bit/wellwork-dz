@@ -98,14 +98,6 @@ function AuthPage() {
               <div><Label className="text-white/80">Mot de passe</Label>
                 <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1 bg-white/5 border-white/10 text-white" />
               </div>
-              <button
-                type="button"
-                onClick={() => setWantsDemo((v) => !v)}
-                className="flex items-center gap-2 text-xs text-white/60 hover:text-white/90 transition"
-              >
-                <KeyRound className="w-3.5 h-3.5" />
-                {wantsDemo ? "J'ai un jeton d'accès démo (cliquer pour masquer)" : "J'ai un jeton d'accès démo approuvé"}
-              </button>
               <Button onClick={doSignUp} disabled={busy} className="w-full gradient-brand text-white border-0 h-11">
                 {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : "Créer mon compte"}
               </Button>
