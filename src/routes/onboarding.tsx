@@ -109,7 +109,7 @@ function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen gradient-mesh flex items-center justify-center px-4 py-12 text-white">
+    <div className="min-h-screen gradient-mesh flex items-center justify-center px-4 py-12 text-foreground">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-2xl">
         <Link to="/" className="flex items-center gap-2 justify-center mb-6">
           <div className="w-10 h-10 rounded-xl gradient-brand flex items-center justify-center shadow-glow">
@@ -119,57 +119,57 @@ function OnboardingPage() {
         </Link>
 
         {mode === "choose" && (
-          <Card className="p-8 rounded-3xl glass-dark border-white/10 text-white">
+          <Card className="p-8 rounded-3xl glass-dark border-white/10 text-foreground">
             <h1 className="text-2xl font-bold text-center mb-2">Bienvenue{user?.email ? `, ${user.email.split("@")[0]}` : ""}</h1>
-            <p className="text-white/60 text-sm text-center mb-8">Comment souhaitez-vous utiliser Wellwork ?</p>
+            <p className="text-muted-foreground text-sm text-center mb-8">Comment souhaitez-vous utiliser Wellwork ?</p>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <button onClick={() => setMode("join_employee")} className="text-left p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-brand hover:bg-white/10 transition-all flex flex-col items-center text-center">
+              <button onClick={() => setMode("join_employee")} className="text-left p-6 rounded-2xl bg-background border hover:border-brand hover:bg-muted transition-all flex flex-col items-center text-center">
                 <KeyRound className="w-6 h-6 mb-3 text-brand" />
                 <div className="font-semibold text-sm">Salarié / Manager</div>
-                <div className="text-[10px] text-white/60 mt-1">J'ai un code d'invitation (WW-...)</div>
+                <div className="text-[10px] text-muted-foreground mt-1">J'ai un code d'invitation (WW-...)</div>
               </button>
               
-              <button onClick={() => setMode("join_token")} className="text-left p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-brand hover:bg-white/10 transition-all flex flex-col items-center text-center">
+              <button onClick={() => setMode("join_token")} className="text-left p-6 rounded-2xl bg-background border hover:border-brand hover:bg-muted transition-all flex flex-col items-center text-center">
                 <Building2 className="w-6 h-6 mb-3 text-brand" />
                 <div className="font-semibold text-sm">Créer l'Espace</div>
-                <div className="text-[10px] text-white/60 mt-1">J'ai un jeton d'accès démo</div>
+                <div className="text-[10px] text-muted-foreground mt-1">J'ai un jeton d'accès démo</div>
               </button>
               
-              <button onClick={() => setMode("request_demo")} className="text-left p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-brand hover:bg-white/10 transition-all flex flex-col items-center text-center">
+              <button onClick={() => setMode("request_demo")} className="text-left p-6 rounded-2xl bg-background border hover:border-brand hover:bg-muted transition-all flex flex-col items-center text-center">
                 <Plus className="w-6 h-6 mb-3 text-brand" />
                 <div className="font-semibold text-sm">Demander une Démo</div>
-                <div className="text-[10px] text-white/60 mt-1">Je veux inscrire mon entreprise</div>
+                <div className="text-[10px] text-muted-foreground mt-1">Je veux inscrire mon entreprise</div>
               </button>
             </div>
             
             <div className="mt-8 text-center">
-              <button onClick={signOut} className="text-xs text-white/40 hover:text-white/70">Se déconnecter</button>
+              <button onClick={signOut} className="text-xs text-muted-foreground hover:text-foreground">Se déconnecter</button>
             </div>
           </Card>
         )}
 
         {mode === "request_demo" && (
-          <Card className="p-8 rounded-3xl glass-dark border-white/10 text-white">
+          <Card className="p-8 rounded-3xl glass-dark border-white/10 text-foreground">
             <div className="flex items-center gap-3 mb-6"><Send className="w-6 h-6 text-brand" /><h1 className="text-xl font-bold">Demander une Démo</h1></div>
-            <p className="text-sm text-white/60 mb-6">Parlez-nous de votre entreprise. Notre équipe examinera votre demande et vous enverra un jeton d'accès.</p>
+            <p className="text-sm text-muted-foreground mb-6">Parlez-nous de votre entreprise. Notre équipe examinera votre demande et vous enverra un jeton d'accès.</p>
             <div className="space-y-4">
-              <div><Label className="text-white/80">Nom de l'entreprise</Label>
-                <Input value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="Ex. TechDZ" className="mt-1 bg-white/5 border-white/10 text-white" />
+              <div><Label className="text-foreground/80">Nom de l'entreprise</Label>
+                <Input value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="Ex. TechDZ" className="mt-1 bg-background border-border text-foreground" />
               </div>
-              <div><Label className="text-white/80">Description / Besoins</Label>
-                <Textarea value={companyDesc} onChange={(e) => setCompanyDesc(e.target.value)} placeholder="Décrivez votre entreprise et vos besoins..." className="mt-1 bg-white/5 border-white/10 text-white min-h-[80px]" />
+              <div><Label className="text-foreground/80">Description / Besoins</Label>
+                <Textarea value={companyDesc} onChange={(e) => setCompanyDesc(e.target.value)} placeholder="Décrivez votre entreprise et vos besoins..." className="mt-1 bg-background border-border text-foreground min-h-[80px]" />
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div><Label className="text-white/80">Votre nom</Label>
-                  <Input value={contactName} onChange={(e) => setContactName(e.target.value)} placeholder="Jean Dupont" className="mt-1 bg-white/5 border-white/10 text-white" />
+                <div><Label className="text-foreground/80">Votre nom</Label>
+                  <Input value={contactName} onChange={(e) => setContactName(e.target.value)} placeholder="Jean Dupont" className="mt-1 bg-background border-border text-foreground" />
                 </div>
-                <div><Label className="text-white/80">Téléphone (Optionnel)</Label>
-                  <Input value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} placeholder="+213 555 55 55" className="mt-1 bg-white/5 border-white/10 text-white" />
+                <div><Label className="text-foreground/80">Téléphone (Optionnel)</Label>
+                  <Input value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} placeholder="+213 555 55 55" className="mt-1 bg-background border-border text-foreground" />
                 </div>
               </div>
               <div className="flex gap-2 pt-4">
-                <Button variant="outline" onClick={() => setMode("choose")} className="bg-transparent border-white/20 text-white hover:bg-white/10">Retour</Button>
+                <Button variant="outline" onClick={() => setMode("choose")} className="bg-transparent border-border text-foreground hover:bg-muted">Retour</Button>
                 <Button onClick={requestDemo} disabled={busy || !companyName.trim() || !contactName.trim()} className="flex-1 gradient-brand border-0 h-11">
                   {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : "Envoyer la demande"}
                 </Button>
@@ -179,18 +179,18 @@ function OnboardingPage() {
         )}
 
         {mode === "demo_success" && (
-          <Card className="p-10 rounded-3xl glass-dark border-brand/30 text-center text-white relative overflow-hidden shadow-elegant">
+          <Card className="p-10 rounded-3xl bg-card border-brand/30 text-center text-card-foreground relative overflow-hidden shadow-elegant">
             <div className="absolute inset-0 bg-brand/5 backdrop-blur-3xl" />
             <div className="relative z-10 flex flex-col items-center">
               <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", damping: 12, delay: 0.1 }} className="w-16 h-16 rounded-full gradient-brand flex items-center justify-center shadow-[0_0_40px_rgba(16,185,129,0.4)] mb-6">
                 <CheckCircle2 className="w-8 h-8 text-white" />
               </motion.div>
               <motion.h1 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-2xl md:text-3xl font-bold font-display mb-3">Demande envoyée avec succès !</motion.h1>
-              <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="text-white/70 max-w-sm mx-auto mb-8 leading-relaxed text-sm">
+              <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="text-muted-foreground max-w-sm mx-auto mb-8 leading-relaxed text-sm">
                 Merci de l'intérêt que vous portez à WellWork. Notre équipe examinera votre demande et vous enverra un jeton d'accès sécurisé par email très rapidement.
               </motion.p>
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
-                <Button onClick={() => setMode("choose")} variant="outline" className="bg-transparent border-white/20 text-white hover:bg-white/10 rounded-full px-8">
+                <Button onClick={() => setMode("choose")} variant="outline" className="bg-transparent border-border text-foreground hover:bg-muted rounded-full px-8">
                   Retour à l'accueil
                 </Button>
               </motion.div>
@@ -199,21 +199,21 @@ function OnboardingPage() {
         )}
 
         {mode === "join_token" && (
-          <Card className="p-8 rounded-3xl glass-dark border-white/10 text-white">
+          <Card className="p-8 rounded-3xl glass-dark border-white/10 text-foreground">
             <div className="flex items-center gap-3 mb-6"><Building2 className="w-6 h-6 text-brand" /><h1 className="text-xl font-bold">Activer votre Espace Démo</h1></div>
             <div className="space-y-4">
-              <div><Label className="text-white/80">Jeton d'accès (Reçu par email)</Label>
-                <Input value={accessToken} onChange={(e) => setAccessToken(e.target.value)} placeholder="Ex. 123e4567-e89b-12d3..." className="mt-1 bg-white/5 border-white/10 text-white font-mono" />
+              <div><Label className="text-foreground/80">Jeton d'accès (Reçu par email)</Label>
+                <Input value={accessToken} onChange={(e) => setAccessToken(e.target.value)} placeholder="Ex. 123e4567-e89b-12d3..." className="mt-1 bg-background border-border text-foreground font-mono" />
               </div>
-              <div><Label className="text-white/80">Nom de l'organisation</Label>
-                <Input value={spaceName} onChange={(e) => setSpaceName(e.target.value)} placeholder="Ex. TechDZ" className="mt-1 bg-white/5 border-white/10 text-white" />
+              <div><Label className="text-foreground/80">Nom de l'organisation</Label>
+                <Input value={spaceName} onChange={(e) => setSpaceName(e.target.value)} placeholder="Ex. TechDZ" className="mt-1 bg-background border-border text-foreground" />
               </div>
-              <div><Label className="text-white/80">Identifiant unique (slug)</Label>
-                <Input value={spaceSlug} onChange={(e) => setSpaceSlug(e.target.value)} placeholder="tech-dz" className="mt-1 bg-white/5 border-white/10 text-white" />
-                <div className="text-[11px] text-white/40 mt-1">Auto-généré à partir du nom si vide.</div>
+              <div><Label className="text-foreground/80">Identifiant unique (slug)</Label>
+                <Input value={spaceSlug} onChange={(e) => setSpaceSlug(e.target.value)} placeholder="tech-dz" className="mt-1 bg-background border-border text-foreground" />
+                <div className="text-[11px] text-muted-foreground mt-1">Auto-généré à partir du nom si vide.</div>
               </div>
               <div className="flex gap-2 pt-4">
-                <Button variant="outline" onClick={() => setMode("choose")} className="bg-transparent border-white/20 text-white hover:bg-white/10">Retour</Button>
+                <Button variant="outline" onClick={() => setMode("choose")} className="bg-transparent border-border text-foreground hover:bg-muted">Retour</Button>
                 <Button onClick={createTrialSpace} disabled={busy || !accessToken.trim() || !spaceName.trim()} className="flex-1 gradient-brand border-0 h-11">
                   {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : "Créer l'espace"}
                 </Button>
@@ -223,15 +223,15 @@ function OnboardingPage() {
         )}
 
         {mode === "join_employee" && (
-          <Card className="p-8 rounded-3xl glass-dark border-white/10 text-white">
+          <Card className="p-8 rounded-3xl glass-dark border-white/10 text-foreground">
             <div className="flex items-center gap-3 mb-6"><KeyRound className="w-6 h-6 text-brand" /><h1 className="text-xl font-bold">Rejoindre avec un code</h1></div>
             <div className="space-y-4">
-              <div><Label className="text-white/80">Code d'invitation</Label>
-                <Input value={inviteCode} onChange={(e) => setInviteCode(e.target.value.toUpperCase())} placeholder="Ex. WW-4G7K-9XZ2" className="mt-1 bg-white/5 border-white/10 text-white font-mono tracking-wider" />
-                <div className="text-[11px] text-white/40 mt-1">Code unique reçu de votre RH ou manager.</div>
+              <div><Label className="text-foreground/80">Code d'invitation</Label>
+                <Input value={inviteCode} onChange={(e) => setInviteCode(e.target.value.toUpperCase())} placeholder="Ex. WW-4G7K-9XZ2" className="mt-1 bg-background border-border text-foreground font-mono tracking-wider" />
+                <div className="text-[11px] text-muted-foreground mt-1">Code unique reçu de votre RH ou manager.</div>
               </div>
               <div className="flex gap-2 pt-4">
-                <Button variant="outline" onClick={() => setMode("choose")} className="bg-transparent border-white/20 text-white hover:bg-white/10">Retour</Button>
+                <Button variant="outline" onClick={() => setMode("choose")} className="bg-transparent border-border text-foreground hover:bg-muted">Retour</Button>
                 <Button onClick={joinWithCode} disabled={busy || !inviteCode.trim()} className="flex-1 gradient-brand border-0 h-11">
                   {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : "Rejoindre"}
                 </Button>

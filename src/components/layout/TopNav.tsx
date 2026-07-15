@@ -151,7 +151,7 @@ export function TopNav() {
       </DropdownMenu>
 
       <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
-        <DialogContent className="glass-dark border-brand/20 text-white sm:max-w-md">
+        <DialogContent className="bg-card border-brand/20 text-card-foreground sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-danger">
               <AlertCircle className="w-5 h-5" />
