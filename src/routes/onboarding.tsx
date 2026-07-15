@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { Building2, KeyRound, Loader2, Plus, Send, CheckCircle2 } from "lucide-react";
-import logoMark from "@/assets/brand/wellwork-logo-mark.jpg";
+import logoMark from "@/assets/brand/wellwork-logo-mark.png";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, useMySpace } from "@/hooks/useAuth";
 import { Card } from "@/components/ui/card";

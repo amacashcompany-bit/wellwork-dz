@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Loader2,  LayoutDashboard, LogOut, User, Image, Home, Settings, Moon, Sun, Globe, MoreVertical, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { useAuth, useMySpace, hasRole } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
-import logoMark from "@/assets/brand/wellwork-logo-mark.jpg";
+import logoMark from "@/assets/brand/wellwork-logo-mark.png";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
