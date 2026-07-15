@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { sendAccessTokenEmail } from "@/lib/mailer";
+import { useI18n } from "@/hooks/useI18n";
 
 export const Route = createFileRoute("/superadmin/")({
   head: () => ({ meta: [{ title: "Super Admin Dashboard — Wellwork" }] }),
@@ -28,7 +29,7 @@ type SpaceInfo = {
   owner_id: string;
   owner_email?: string;
   member_count?: number;
-  trial_expires_at?: string;
+  trial_expires_at?: string | null;
 };
 
 type DemoRequest = {
@@ -40,10 +41,11 @@ type DemoRequest = {
   contact_phone: string | null;
   status: "pending" | "approved" | "rejected";
   created_at: string;
-  access_token?: string;
+  access_token?: string | null;
 };
 
 function SuperAdminDashboard() {
+  const { t } = useI18n();
   const [tab, setTab] = useState<"spaces" | "demos">("spaces");
   
   const [spaces, setSpaces] = useState<SpaceInfo[]>([]);
@@ -175,8 +177,8 @@ function SuperAdminDashboard() {
   return (
     <div className="space-y-6 pb-20">
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-2xl font-bold font-display">Vue d'ensemble de la plateforme</h1>
-        <p className="text-sm text-muted-foreground mt-1">Gérez toutes les entreprises et surveillez l'activité globale.</p>
+        <h1 className="text-2xl font-bold font-display">{t("saPlatformOverview")}</h1>
+        <p className="text-sm text-muted-foreground mt-1">{t("saManageCompanies")}</p>
       </motion.div>
 
       {/* Stats row */}
@@ -187,7 +189,7 @@ function SuperAdminDashboard() {
               <Building2 className="w-6 h-6 text-brand" />
             </div>
             <div>
-              <div className="text-sm text-muted-foreground">Entreprises</div>
+              <div className="text-sm text-muted-foreground">{t("saCompanies")}</div>
               <div className="text-2xl font-bold">{loading ? "-" : stats.totalSpaces}</div>
             </div>
           </Card>
@@ -199,7 +201,7 @@ function SuperAdminDashboard() {
               <Users className="w-6 h-6 text-blue-500" />
             </div>
             <div>
-              <div className="text-sm text-muted-foreground">Utilisateurs</div>
+              <div className="text-sm text-muted-foreground">{t("saTotalUsers")}</div>
               <div className="text-2xl font-bold">{loading ? "-" : stats.totalUsers}</div>
             </div>
           </Card>
@@ -211,7 +213,7 @@ function SuperAdminDashboard() {
               <ShieldCheck className="w-6 h-6 text-emerald-500" />
             </div>
             <div>
-              <div className="text-sm text-muted-foreground">Actifs</div>
+              <div className="text-sm text-muted-foreground">{t("saActiveSpaces")}</div>
               <div className="text-2xl font-bold">{loading ? "-" : stats.activeSpaces}</div>
             </div>
           </Card>
@@ -223,7 +225,7 @@ function SuperAdminDashboard() {
               <Clock className="w-6 h-6 text-amber-500" />
             </div>
             <div>
-              <div className="text-sm text-muted-foreground">Demandes (Démo)</div>
+              <div className="text-sm text-muted-foreground">{t("saPendingRequests")}</div>
               <div className="text-2xl font-bold">{loading ? "-" : stats.pendingDemos}</div>
             </div>
           </Card>
@@ -235,13 +237,13 @@ function SuperAdminDashboard() {
           onClick={() => setTab("spaces")}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${tab === 'spaces' ? 'bg-background shadow text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
         >
-          Entreprises Inscrits
+          {t("saCompanies")}
         </button>
         <button 
           onClick={() => setTab("demos")}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${tab === 'demos' ? 'bg-background shadow text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
         >
-          Demandes de Démo
+          {t("saDemoRequests")}
           {stats.pendingDemos > 0 && (
             <Badge variant="default" className="h-5 px-1.5 min-w-[20px] rounded-full bg-brand flex items-center justify-center text-[10px]">
               {stats.pendingDemos}
@@ -255,10 +257,10 @@ function SuperAdminDashboard() {
           <motion.div key="spaces" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
             <Card className="p-1 rounded-2xl">
               <div className="p-4 flex flex-col sm:flex-row justify-between items-center gap-4 border-b border-border/40">
-                <h2 className="font-semibold text-lg flex items-center gap-2">Comptes Entreprise</h2>
+                <h2 className="font-semibold text-lg flex items-center gap-2">{t("saCompanies")}</h2>
                 <div className="relative w-full sm:w-72">
                   <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Rechercher une entreprise..." className="ps-9 rounded-xl bg-muted/50 border-transparent focus-visible:bg-background" />
+                  <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("saSearchCompany")} className="ps-9 rounded-xl bg-muted/50 border-transparent focus-visible:bg-background" />
                 </div>
               </div>
 
@@ -271,11 +273,11 @@ function SuperAdminDashboard() {
                   <Table>
                     <TableHeader>
                       <TableRow className="border-border/40 hover:bg-transparent">
-                        <TableHead>Nom de l'entreprise</TableHead>
+                        <TableHead>{t("saCompany")}</TableHead>
                         <TableHead>Slug</TableHead>
-                        <TableHead>Membres</TableHead>
-                        <TableHead>Créé le</TableHead>
-                        <TableHead>Statut</TableHead>
+                        <TableHead>{t("saMembers")}</TableHead>
+                        <TableHead>{t("saDate")}</TableHead>
+                        <TableHead>{t("saStatus")}</TableHead>
                         <TableHead className="w-12"></TableHead>
                       </TableRow>
                     </TableHeader>
@@ -312,10 +314,10 @@ function SuperAdminDashboard() {
           <motion.div key="demos" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
             <Card className="p-1 rounded-2xl border-brand/20">
               <div className="p-4 flex flex-col sm:flex-row justify-between items-center gap-4 border-b border-border/40">
-                <h2 className="font-semibold text-lg flex items-center gap-2">Demandes de Démo</h2>
+                <h2 className="font-semibold text-lg flex items-center gap-2">{t("saDemoRequests")}</h2>
                 <div className="relative w-full sm:w-72">
                   <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Rechercher une entreprise..." className="ps-9 rounded-xl bg-muted/50 border-transparent focus-visible:bg-background" />
+                  <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("saSearchCompany")} className="ps-9 rounded-xl bg-muted/50 border-transparent focus-visible:bg-background" />
                 </div>
               </div>
 
@@ -328,12 +330,12 @@ function SuperAdminDashboard() {
                   <Table>
                     <TableHeader>
                       <TableRow className="border-border/40 hover:bg-transparent">
-                        <TableHead>Entreprise</TableHead>
-                        <TableHead>Contact</TableHead>
-                        <TableHead>Demande</TableHead>
+                        <TableHead>{t("saCompany")}</TableHead>
+                        <TableHead>{t("saContact")}</TableHead>
+                        <TableHead>{t("saDemoRequests")}</TableHead>
                         <TableHead>Jeton (Si approuvé)</TableHead>
-                        <TableHead>Statut</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
+                        <TableHead>{t("saStatus")}</TableHead>
+                        <TableHead className="text-right">{t("actions")}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -361,17 +363,17 @@ function SuperAdminDashboard() {
                               demo.status === 'approved' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 
                               'bg-destructive/10 text-destructive border-destructive/20'
                             }>
-                              {demo.status === 'pending' ? 'En attente' : demo.status === 'approved' ? 'Approuvé' : 'Rejeté'}
+                              {demo.status === 'pending' ? t('saPending') : demo.status === 'approved' ? t('saApproved') : t('saRejected')}
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right">
                             {demo.status === 'pending' && (
                               <div className="flex justify-end gap-2">
                                 <Button size="sm" variant="outline" className="h-8 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => rejectDemo(demo.id)}>
-                                  <XCircle className="w-3.5 h-3.5 me-1" /> Rejeter
+                                  <XCircle className="w-3.5 h-3.5 me-1" /> {t("saReject")}
                                 </Button>
                                 <Button size="sm" className="h-8 gradient-brand border-0" onClick={() => setSelectedDemo(demo)}>
-                                  <CheckCircle2 className="w-3.5 h-3.5 me-1" /> Approuver
+                                  <CheckCircle2 className="w-3.5 h-3.5 me-1" /> {t("saApprove")}
                                 </Button>
                               </div>
                             )}
@@ -390,23 +392,23 @@ function SuperAdminDashboard() {
       <Dialog open={!!selectedDemo} onOpenChange={(open) => !open && setSelectedDemo(null)}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Approuver la demande</DialogTitle>
+            <DialogTitle>{t("saApprove")}</DialogTitle>
             <DialogDescription>
               Vous allez générer un jeton d'accès pour <strong>{selectedDemo?.company_name}</strong>. Ce jeton devra leur être envoyé par email.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="flex flex-col gap-2">
-              <Label>Durée de l'essai (en jours)</Label>
+              <Label>{t("saTrialDurationDays")}</Label>
               <Input type="number" value={trialDuration} onChange={(e) => setTrialDuration(e.target.value)} min="1" max="365" className="bg-muted/50" />
-              <p className="text-xs text-muted-foreground">Une fois le jeton utilisé, l'espace sera actif pour cette durée.</p>
+              <p className="text-xs text-muted-foreground">{t("saApproveDemoDesc")}</p>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setSelectedDemo(null)}>Annuler</Button>
+            <Button variant="outline" onClick={() => setSelectedDemo(null)}>{t("cancel")}</Button>
             <Button onClick={approveDemo} disabled={isApproving} className="gradient-brand border-0">
               {isApproving ? <Loader2 className="w-4 h-4 animate-spin me-2" /> : <CheckCircle2 className="w-4 h-4 me-2" />}
-              Approuver & Générer
+              {t("saGenerateToken")}
             </Button>
           </DialogFooter>
         </DialogContent>

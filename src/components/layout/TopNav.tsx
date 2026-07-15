@@ -42,7 +42,7 @@ export function TopNav() {
   const handleDeleteAccount = async () => {
     if (deleteConfirmText !== "delete account") return;
     setIsDeleting(true);
-    const { error } = await supabase.rpc("delete_my_account");
+    const { error } = await supabase.rpc("delete_my_account" as any);
     setIsDeleting(false);
     
     if (error) {

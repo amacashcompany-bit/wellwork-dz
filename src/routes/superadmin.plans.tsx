@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
+import { useI18n } from "@/hooks/useI18n";
 
 export const Route = createFileRoute("/superadmin/plans")({
   component: SuperAdminPlans,
@@ -33,6 +34,7 @@ type Plan = {
 };
 
 function SuperAdminPlans() {
+  const { t } = useI18n();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -52,7 +54,11 @@ function SuperAdminPlans() {
     if (error) {
       toast.error("Erreur de chargement: " + error.message);
     } else {
-      setPlans(data || []);
+      const parsedPlans = (data || []).map((p: any) => ({
+        ...p,
+        features: Array.isArray(p.features) ? p.features : [],
+      }));
+      setPlans(parsedPlans as Plan[]);
     }
     setLoading(false);
   }, []);
@@ -122,11 +128,11 @@ function SuperAdminPlans() {
     <div className="space-y-6 pb-20">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 className="text-2xl font-bold font-display">Gestion des Plans</h1>
-          <p className="text-sm text-muted-foreground mt-1">Créez et modifiez les abonnements affichés sur la page d'accueil.</p>
+          <h1 className="text-2xl font-bold font-display">{t("saManagePlans")}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t("saManagePlansDesc")}</p>
         </motion.div>
         <Button onClick={() => handleOpenDialog()} className="gradient-brand text-white border-0 shadow-glow">
-          <Plus className="w-4 h-4 me-2" /> Nouveau Plan
+          <Plus className="w-4 h-4 me-2" /> {t("saCreatePlan")}
         </Button>
       </div>
 
@@ -141,11 +147,11 @@ function SuperAdminPlans() {
               <TableHeader>
                 <TableRow className="border-border/40">
                   <TableHead>Ordre</TableHead>
-                  <TableHead>Nom</TableHead>
-                  <TableHead>Prix</TableHead>
-                  <TableHead>Démo ?</TableHead>
-                  <TableHead>Actif ?</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t("saPlanName")}</TableHead>
+                  <TableHead>{t("saPriceMonthly")}</TableHead>
+                  <TableHead>{t("saIsDemo")} ?</TableHead>
+                  <TableHead>{t("saActive")} ?</TableHead>
+                  <TableHead className="text-right">{t("actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -163,7 +169,7 @@ function SuperAdminPlans() {
                       {p.price_monthly === null ? "Sur devis" : `${p.price_monthly} ${p.currency}/mois`}
                     </TableCell>
                     <TableCell>
-                      {p.is_demo ? <Badge variant="secondary" className="bg-amber-500/10 text-amber-600">Oui</Badge> : <span className="text-muted-foreground text-xs">Non</span>}
+                      {p.is_demo ? <Badge variant="secondary" className="bg-amber-500/10 text-amber-600">{t("yes")}</Badge> : <span className="text-muted-foreground text-xs">{t("no")}</span>}
                     </TableCell>
                     <TableCell>
                       {p.active ? <Check className="w-4 h-4 text-emerald-500" /> : <X className="w-4 h-4 text-muted-foreground" />}
@@ -189,12 +195,12 @@ function SuperAdminPlans() {
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingPlan?.id ? "Modifier le plan" : "Créer un plan"}</DialogTitle>
+            <DialogTitle>{editingPlan?.id ? t("saEditPlan") : t("saCreatePlan")}</DialogTitle>
           </DialogHeader>
 
           <div className="grid grid-cols-2 gap-4 py-4">
             <div className="grid gap-2">
-              <Label>Nom</Label>
+              <Label>{t("saPlanName")}</Label>
               <Input value={editingPlan?.name || ""} onChange={e => setEditingPlan({ ...editingPlan, name: e.target.value })} />
             </div>
             <div className="grid gap-2">
@@ -202,15 +208,15 @@ function SuperAdminPlans() {
               <Input value={editingPlan?.slug || ""} onChange={e => setEditingPlan({ ...editingPlan, slug: e.target.value })} />
             </div>
             <div className="grid gap-2 col-span-2">
-              <Label>Slogan (Tagline)</Label>
+              <Label>{t("saTagline")}</Label>
               <Input value={editingPlan?.tagline || ""} onChange={e => setEditingPlan({ ...editingPlan, tagline: e.target.value })} />
             </div>
             <div className="grid gap-2">
-              <Label>Prix mensuel (vide = "Sur devis")</Label>
+              <Label>{t("saPriceMonthly")}</Label>
               <Input type="number" value={editingPlan?.price_monthly ?? ""} onChange={e => setEditingPlan({ ...editingPlan, price_monthly: e.target.value ? Number(e.target.value) : null })} />
             </div>
             <div className="grid gap-2">
-              <Label>Devise</Label>
+              <Label>{t("saCurrency")}</Label>
               <Input value={editingPlan?.currency || "EUR"} onChange={e => setEditingPlan({ ...editingPlan, currency: e.target.value })} />
             </div>
             <div className="grid gap-2">
@@ -221,20 +227,20 @@ function SuperAdminPlans() {
             <div className="col-span-2 grid grid-cols-3 gap-4 pt-2">
               <label className="flex items-center gap-2 text-sm cursor-pointer">
                 <Checkbox checked={editingPlan?.active ?? false} onCheckedChange={(c) => setEditingPlan({ ...editingPlan, active: !!c })} />
-                Actif
+                {t("saActive")}
               </label>
               <label className="flex items-center gap-2 text-sm cursor-pointer">
                 <Checkbox checked={editingPlan?.is_demo ?? false} onCheckedChange={(c) => setEditingPlan({ ...editingPlan, is_demo: !!c })} />
-                Plan Démo Gratuit
+                {t("saIsDemo")}
               </label>
               <label className="flex items-center gap-2 text-sm cursor-pointer">
                 <Checkbox checked={editingPlan?.highlighted ?? false} onCheckedChange={(c) => setEditingPlan({ ...editingPlan, highlighted: !!c })} />
-                Mis en avant
+                {t("saHighlighted")}
               </label>
             </div>
 
             <div className="grid gap-2 col-span-2 mt-2">
-              <Label>Fonctionnalités (une par ligne)</Label>
+              <Label>{t("saFeatures")}</Label>
               <Textarea 
                 value={featuresText} 
                 onChange={e => setFeaturesText(e.target.value)} 
@@ -245,9 +251,9 @@ function SuperAdminPlans() {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsOpen(false)}>Annuler</Button>
+            <Button variant="outline" onClick={() => setIsOpen(false)}>{t("cancel")}</Button>
             <Button onClick={handleSave} disabled={saving} className="gradient-brand text-white border-0">
-              {saving && <Loader2 className="w-4 h-4 animate-spin me-2" />} Sauvegarder
+              {saving && <Loader2 className="w-4 h-4 animate-spin me-2" />} {t("save")}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -107,14 +107,14 @@ function FeedbackPage() {
     setDecryptedMessages({});
     try {
       const hash = await sha256Hex(raw);
-      const { data: ticketsData, error: ticketError } = await supabase.rpc("get_ticket_by_hash", { p_hash: hash });
+      const { data: ticketsData, error: ticketError } = await (supabase.rpc as any)("get_ticket_by_hash", { p_hash: hash });
       if (ticketError) throw ticketError;
-      if (!ticketsData || ticketsData.length === 0) {
+      if (!ticketsData || (ticketsData as any).length === 0) {
         toast.error(pick("Clé de suivi introuvable ou incorrecte", "رمز التتبع غير موجود", "Tracking key not found or incorrect"));
         return;
       }
 
-      const ticket = ticketsData[0] as FeedbackTicket;
+      const ticket = (ticketsData as any)[0] as FeedbackTicket;
       setTrackedTicket(ticket);
 
       const [decSubj, decBody] = await Promise.all([
@@ -123,7 +123,7 @@ function FeedbackPage() {
       ]);
       setDecryptedTicket({ subject: decSubj, body: decBody });
 
-      const { data: messagesData, error: msgError } = await supabase.rpc("get_ticket_messages", { 
+      const { data: messagesData, error: msgError } = await (supabase.rpc as any)("get_ticket_messages", { 
         p_ticket_id: ticket.id, 
         p_hash: hash 
       });
@@ -153,7 +153,7 @@ function FeedbackPage() {
       const hash = await sha256Hex(trackKey.trim());
       const encReply = await encryptWithKey(replyText.trim(), info.spaceId);
 
-      const { error } = await supabase.rpc("reply_to_ticket_anonymously", {
+      const { error } = await (supabase.rpc as any)("reply_to_ticket_anonymously", {
         p_ticket_id: trackedTicket.id,
         p_hash: hash,
         p_encrypted_content: encReply

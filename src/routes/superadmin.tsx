@@ -1,9 +1,13 @@
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Loader2, Sparkles, LayoutDashboard, LogOut, User, Image, Home, Settings } from "lucide-react";
+import { Loader2, Sparkles, LayoutDashboard, LogOut, User, Image, Home, Settings, Moon, Sun, Globe, MoreVertical } from "lucide-react";
 import { useAuth, useMySpace, hasRole } from "@/hooks/useAuth";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useI18n } from "@/hooks/useI18n";
+import { useStore } from "@/store/useStore";
+import { LANGS } from "@/lib/i18n";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,6 +23,10 @@ function SuperAdminLayout() {
   const navigate = useNavigate();
   const { user, loading, signOut } = useAuth();
   const { info, loading: spaceLoading } = useMySpace();
+  const { t, language, setLanguage } = useI18n();
+  const isDark = useStore((s) => s.isDarkMode);
+  const toggleDark = useStore((s) => s.toggleDarkMode);
+  const currentLang = LANGS.find((l) => l.code === language) || LANGS[0];
 
   // Profile Customization state
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -97,7 +105,7 @@ function SuperAdminLayout() {
             </div>
             <div>
               <div className="font-display font-bold leading-tight">Wellwork</div>
-              <div className="text-[9px] uppercase tracking-widest text-brand font-semibold">Master Admin</div>
+              <div className="text-[9px] uppercase tracking-widest text-brand font-semibold">{t("saMasterAdmin")}</div>
             </div>
           </Link>
         </div>
@@ -111,7 +119,7 @@ function SuperAdminLayout() {
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors"
           >
             <LayoutDashboard className="w-4 h-4" />
-            Tableau de bord
+            {t("dashboard")}
           </Link>
           <Link
             to="/superadmin/plans"
@@ -120,7 +128,7 @@ function SuperAdminLayout() {
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors"
           >
             <Settings className="w-4 h-4" />
-            Abonnements & Plans
+            {t("saPlansAndPricing")}
           </Link>
 
           <div className="pt-6">
@@ -129,10 +137,33 @@ function SuperAdminLayout() {
               className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
             >
               <Home className="w-4 h-4" />
-              Page d'accueil
+              {t("home")}
             </Link>
           </div>
         </nav>
+
+        {/* Toggles */}
+        <div className="px-4 pb-2 flex gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="flex-1 justify-start gap-2 h-9 text-xs">
+                <Globe className="w-4 h-4 text-muted-foreground" />
+                <span className="truncate">{currentLang.label}</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-40">
+              {LANGS.map((l) => (
+                <DropdownMenuItem key={l.code} onClick={() => setLanguage(l.code)}>
+                  <img src={l.flag} alt={l.code} className="me-2 w-4 h-3 object-cover rounded-sm shadow-sm" /> {l.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <Button variant="outline" size="icon" className="h-9 w-9 shrink-0" onClick={toggleDark}>
+            {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </Button>
+        </div>
 
         {/* User profile section at the bottom */}
         <div className="p-4 border-t border-border/40 space-y-3">
@@ -150,37 +181,50 @@ function SuperAdminLayout() {
             </div>
           </div>
 
-          <div className="space-y-1">
-            <button
-              onClick={() => setIsProfileOpen(true)}
-              className="flex items-center gap-3 w-full px-3 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
-            >
-              <User className="w-4 h-4" />
-              Mon Profil
-            </button>
-            <button
-              onClick={signOut}
-              className="flex items-center gap-3 w-full px-3 py-2 rounded-xl text-sm font-medium text-red-500 hover:bg-red-500/10 hover:text-red-600 transition-colors"
-            >
-              <LogOut className="w-4 h-4" />
-              Déconnexion
-            </button>
-          </div>
+          <div className="ml-auto">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <MoreVertical className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem onClick={() => setIsProfileOpen(true)}>
+                <User className="w-4 h-4 mr-2" />
+                {t("profile")}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={toggleDark}>
+                {isDark ? <Sun className="w-4 h-4 mr-2" /> : <Moon className="w-4 h-4 mr-2" />}
+                {isDark ? t("lightMode") : t("darkMode")}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setLanguage(currentLang.code === 'en' ? 'fr' : 'en')}>
+                <Globe className="w-4 h-4 mr-2" />
+                {t("language")}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={signOut} className="text-destructive">
+                <LogOut className="w-4 h-4 mr-2" />
+                {t("logout")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 min-h-[calc(100vh-4rem)] md:min-h-screen p-6 md:p-8 overflow-y-auto">
-        <Outlet />
+      <main className="flex-1 overflow-y-auto">
+        <div className="p-6 md:p-10 max-w-7xl mx-auto">
+          <Outlet />
+        </div>
       </main>
 
-      {/* Profile Edit Dialog */}
+      {/* Profile Dialog */}
       <Dialog open={isProfileOpen} onOpenChange={setIsProfileOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Modifier mon profil</DialogTitle>
+            <DialogTitle>{t("profile")}</DialogTitle>
             <DialogDescription>
-              Personnalisez votre nom de profil et votre avatar d'administrateur.
+              Modifiez vos informations personnelles.
             </DialogDescription>
           </DialogHeader>
 
@@ -196,40 +240,33 @@ function SuperAdminLayout() {
             </div>
             
             <div className="grid gap-2">
-              <Label>Choisir un avatar prédéfini</Label>
-              <div className="flex gap-2.5 mt-1">
-                {avatarOptions.map((opt) => (
-                  <button
+              <Label htmlFor="avatar">Ou URL de l'avatar personnalisée</Label>
+              <Input
+                id="avatar"
+                value={profileAvatar}
+                onChange={(e) => setProfileAvatar(e.target.value)}
+                placeholder="https://example.com/avatar.png"
+              />
+              <div className="grid grid-cols-5 gap-3 pt-2">
+                {avatarOptions.map(opt => (
+                  <div 
                     key={opt}
-                    type="button"
+                    className={`cursor-pointer rounded-xl overflow-hidden border-2 transition-all ${profileAvatar === opt ? 'border-brand shadow-glow' : 'border-transparent hover:border-brand/30'}`}
                     onClick={() => setProfileAvatar(opt)}
-                    className={`w-12 h-12 rounded-xl overflow-hidden border-2 transition-all hover:scale-105 ${profileAvatar === opt ? 'border-brand shadow-glow' : 'border-border/40 opacity-70 hover:opacity-100'}`}
                   >
-                    <img src={opt} alt="Avatar option" className="w-full h-full object-cover" />
-                  </button>
+                    <img src={opt} className="w-full aspect-square object-cover bg-muted/30" alt="Avatar option" />
+                  </div>
                 ))}
               </div>
             </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="avatar">Ou URL de l'avatar personnalisée</Label>
-              <div className="relative">
-                <Input
-                  id="avatar"
-                  value={profileAvatar}
-                  onChange={(e) => setProfileAvatar(e.target.value)}
-                  placeholder="https://example.com/avatar.png"
-                  className="pr-10"
-                />
-                <Image className="absolute right-3 top-3 w-4 h-4 text-muted-foreground" />
-              </div>
-            </div>
           </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsProfileOpen(false)}>Annuler</Button>
-            <Button onClick={handleSaveProfile} disabled={savingProfile} className="gradient-brand text-white border-0">
-              {savingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sauvegarder"}
+          <DialogFooter className="sm:justify-end">
+            <Button variant="outline" onClick={() => setIsProfileOpen(false)}>
+              {t("cancel")}
+            </Button>
+            <Button onClick={handleSaveProfile} disabled={savingProfile}>
+              {savingProfile ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+              {t("save")}
             </Button>
           </DialogFooter>
         </DialogContent>
