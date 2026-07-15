@@ -128,14 +128,14 @@
   --chart-4: oklch(0.80 0.15 75);
   --chart-5: oklch(0.65 0.24 20);
 
-  /* Sidebar — deep midnight */
-  --sidebar: oklch(0.14 0.04 275);
-  --sidebar-foreground: oklch(0.96 0.01 275);
+  /* Sidebar — light by default */
+  --sidebar: oklch(0.985 0.006 275);
+  --sidebar-foreground: oklch(0.15 0.05 275);
   --sidebar-primary: oklch(0.62 0.24 278);
   --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.22 0.06 275);
-  --sidebar-accent-foreground: oklch(0.99 0.003 275);
-  --sidebar-border: oklch(0.25 0.06 275);
+  --sidebar-accent: oklch(0.96 0.015 275);
+  --sidebar-accent-foreground: oklch(0.24 0.09 275);
+  --sidebar-border: oklch(0.92 0.015 275);
   --sidebar-ring: oklch(0.62 0.24 278);
 
   /* Logo-derived accents — emerald leaf + teal check harmonized with indigo */
@@ -181,6 +181,16 @@
   --ring: oklch(0.62 0.24 278);
   --surface: oklch(0.10 0.04 275);
   --ink: oklch(0.98 0.005 275);
+
+  /* Sidebar — deep midnight */
+  --sidebar: oklch(0.14 0.04 275);
+  --sidebar-foreground: oklch(0.96 0.01 275);
+  --sidebar-primary: oklch(0.62 0.24 278);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.22 0.06 275);
+  --sidebar-accent-foreground: oklch(0.99 0.003 275);
+  --sidebar-border: oklch(0.25 0.06 275);
+  --sidebar-ring: oklch(0.62 0.24 278);
 }
 
 @layer base {
