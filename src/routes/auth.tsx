@@ -61,9 +61,7 @@ function AuthPage() {
       <div className="absolute inset-0 opacity-30 pointer-events-none" style={{ background: "radial-gradient(1200px 600px at 20% 20%, rgba(139,92,246,0.4), transparent 60%), radial-gradient(1000px 500px at 80% 80%, rgba(56,189,248,0.25), transparent 60%)" }} />
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="relative w-full max-w-md">
         <Link to="/" className="flex items-center gap-2 justify-center mb-6 text-foreground">
-          <div className="w-10 h-10 rounded-xl gradient-brand flex items-center justify-center shadow-glow">
-            <Sparkles className="w-5 h-5 text-white" />
-          </div>
+          <img src={logoMark} alt="Wellwork" className="w-10 h-10 object-contain drop-shadow-[0_2px_8px_rgba(16,185,129,0.35)]" />
           <div>
             <div className="font-display font-bold text-lg">Wellwork</div>
             <div className="text-[10px] uppercase tracking-widest text-muted-foreground">QVT · Prévention RPS</div>
