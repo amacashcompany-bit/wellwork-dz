@@ -64,10 +64,6 @@ export function TopNav() {
 
   return (
     <header className="fixed top-0 inset-x-0 z-50 h-16 glass border-b flex items-center px-4 md:px-6 gap-3">
-      <Button variant="ghost" size="icon" onClick={toggleSidebar} className="hidden md:flex shrink-0 w-9 h-9 text-muted-foreground hover:text-foreground">
-        {isSidebarCollapsed ? <PanelLeftOpen className="w-5 h-5" /> : <PanelLeftClose className="w-5 h-5" />}
-      </Button>
-
       <Link to={role === "admin" ? "/admin/dashboard" : "/employee/home"} className="flex items-center gap-2 shrink-0">
         <motion.img
           src={logoMark}
@@ -84,7 +80,9 @@ export function TopNav() {
         </div>
       </Link>
 
-
+      <Button variant="ghost" size="icon" onClick={toggleSidebar} className="hidden md:flex shrink-0 w-9 h-9 text-muted-foreground hover:text-foreground ml-1">
+        {isSidebarCollapsed ? <PanelLeftOpen className="w-5 h-5" /> : <PanelLeftClose className="w-5 h-5" />}
+      </Button>
 
       <div className="flex-1" />
 
