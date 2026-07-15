@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Loader2, Plus, Edit2, Trash2, Check, X } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { billingDb } from "@/lib/billing";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,9 @@ type Plan = {
   name: string;
   tagline: string | null;
   price_monthly: number | null;
+  price_yearly: number | null;
   currency: string;
+  duration_months: number;
   is_demo: boolean;
   highlighted: boolean;
   active: boolean;
@@ -46,7 +48,7 @@ function SuperAdminPlans() {
 
   const loadPlans = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    const { data, error } = await billingDb
       .from("plans")
       .select("*")
       .order("sort_order", { ascending: true });
@@ -73,7 +75,7 @@ function SuperAdminPlans() {
       setFeaturesText((plan.features || []).join("\n"));
     } else {
       setEditingPlan({
-        slug: "", name: "", tagline: "", price_monthly: 0, currency: "EUR",
+        slug: "", name: "", tagline: "", price_monthly: 0, price_yearly: 0, currency: "DZD", duration_months: 1,
         is_demo: false, highlighted: false, active: true, sort_order: plans.length
       });
       setFeaturesText("");
@@ -97,10 +99,10 @@ function SuperAdminPlans() {
 
     let error;
     if (editingPlan.id) {
-      const res = await supabase.from("plans").update(planData).eq("id", editingPlan.id);
+      const res = await billingDb.from("plans").update(planData).eq("id", editingPlan.id);
       error = res.error;
     } else {
-      const res = await supabase.from("plans").insert(planData as any);
+      const res = await billingDb.from("plans").insert(planData);
       error = res.error;
     }
 
@@ -116,7 +118,7 @@ function SuperAdminPlans() {
 
   const handleDelete = async (id: string) => {
     if (!window.confirm("Supprimer ce plan définitivement ?")) return;
-    const { error } = await supabase.from("plans").delete().eq("id", id);
+    const { error } = await billingDb.from("plans").delete().eq("id", id);
     if (error) toast.error(error.message);
     else {
       toast.success("Plan supprimé");
@@ -217,7 +219,15 @@ function SuperAdminPlans() {
             </div>
             <div className="grid gap-2">
               <Label>{t("saCurrency")}</Label>
-              <Input value={editingPlan?.currency || "EUR"} onChange={e => setEditingPlan({ ...editingPlan, currency: e.target.value })} />
+              <Input value={editingPlan?.currency || "DZD"} onChange={e => setEditingPlan({ ...editingPlan, currency: e.target.value.toUpperCase() })} />
+            </div>
+            <div className="grid gap-2">
+              <Label>Prix annuel</Label>
+              <Input type="number" value={editingPlan?.price_yearly ?? ""} onChange={e => setEditingPlan({ ...editingPlan, price_yearly: e.target.value ? Number(e.target.value) : null })} />
+            </div>
+            <div className="grid gap-2">
+              <Label>Durée (mois)</Label>
+              <Input type="number" min="1" value={editingPlan?.duration_months ?? 1} onChange={e => setEditingPlan({ ...editingPlan, duration_months: Math.max(1, Number(e.target.value)) })} />
             </div>
             <div className="grid gap-2">
               <Label>Ordre d'affichage</Label>

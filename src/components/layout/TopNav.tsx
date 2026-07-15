@@ -61,6 +61,7 @@ export function TopNav() {
 
   const isSidebarCollapsed = useStore((s) => s.isSidebarCollapsed);
   const toggleSidebar = useStore((s) => s.toggleSidebar);
+  const setMobileNavOpen = useStore((s) => s.setMobileNavOpen);
 
   return (
     <header className="fixed top-0 inset-x-0 z-50 h-16 glass border-b flex items-center px-4 md:px-6 gap-3">
@@ -84,6 +85,10 @@ export function TopNav() {
         {isSidebarCollapsed ? <PanelLeftOpen className="w-5 h-5" /> : <PanelLeftClose className="w-5 h-5" />}
       </Button>
 
+      <Button variant="ghost" size="icon" onClick={() => setMobileNavOpen(true)} className="md:hidden shrink-0 w-9 h-9 text-muted-foreground hover:text-foreground" aria-label="Open navigation">
+        <Menu className="w-5 h-5" />
+      </Button>
+
       <div className="flex-1" />
 
       <Badge variant="outline" className="hidden lg:inline-flex gap-1.5 py-1">
@@ -97,7 +102,7 @@ export function TopNav() {
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" className="gap-1.5">
+          <Button variant="outline" size="sm" className="h-9 w-9 gap-1.5 px-0 sm:w-auto sm:px-3">
             <img src={currentLang.flag} alt={currentLang.code} className="w-4 h-3 object-cover rounded-sm shadow-sm" />
             <span className="hidden sm:inline">{currentLang.label}</span>
           </Button>
@@ -111,11 +116,11 @@ export function TopNav() {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <Button variant="ghost" size="icon" onClick={toggleDark} aria-label="Toggle theme">
+      <Button variant="ghost" size="icon" onClick={toggleDark} aria-label="Toggle theme" className="hidden sm:inline-flex">
         {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
       </Button>
 
-      <Button variant="ghost" size="icon" className="relative">
+      <Button variant="ghost" size="icon" className="relative hidden sm:inline-flex">
         <Bell className="w-4 h-4" />
       </Button>
 

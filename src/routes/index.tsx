@@ -436,11 +436,11 @@ function PricingSection() {
                     ))}
                   </ul>
                   <div className="mt-6">
-                    <Link to="/auth">
+                    <a href={plan.price_monthly === null || plan.is_demo ? "/auth" : `/checkout?plan=${plan.id}`}>
                       <Button className={`w-full rounded-full ${plan.highlighted ? "gradient-brand text-white border-0" : ""}`} variant={plan.highlighted ? "default" : "outline"}>
                         {plan.price_monthly === null ? t("landingPricingContact") : t("landingPricingCreate")}
                       </Button>
-                    </Link>
+                    </a>
                   </div>
                 </div>
               </motion.div>

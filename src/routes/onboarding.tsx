@@ -21,7 +21,7 @@ function OnboardingPage() {
   const navigate = useNavigate();
   const { user, loading: authLoading, signOut } = useAuth();
   const { info, loading: spaceLoading, refetch } = useMySpace();
-  const [mode, setMode] = useState<"choose" | "request_demo" | "join_token" | "join_employee" | "demo_success">("choose");
+  const [mode, setMode] = useState<"choose" | "request_demo" | "join_token" | "join_employee" | "join_manager" | "demo_success">("choose");
   
   // State for request demo
   const [companyName, setCompanyName] = useState("");
@@ -34,10 +34,19 @@ function OnboardingPage() {
   const [spaceName, setSpaceName] = useState("");
   const [spaceSlug, setSpaceSlug] = useState("");
   
-  // State for employee join
+  // Employee IDs and manager invitations are intentionally separate flows.
+  const [employeeId, setEmployeeId] = useState("");
   const [inviteCode, setInviteCode] = useState("");
   
   const [busy, setBusy] = useState(false);
+  const [googleEmployeeFlow, setGoogleEmployeeFlow] = useState(false);
+
+  useEffect(() => {
+    if (sessionStorage.getItem("wellwork-employee-onboarding") === "true") {
+      setGoogleEmployeeFlow(true);
+      setMode("join_employee");
+    }
+  }, []);
 
   useEffect(() => {
     if (authLoading) return;
@@ -93,16 +102,33 @@ function OnboardingPage() {
     navigate({ to: "/admin/dashboard", replace: true });
   };
 
-  const joinWithCode = async () => {
+  const joinWithEmployeeId = async () => {
+    if (!user || !employeeId.trim()) return;
+    setBusy(true);
+    const claimEmployeeId = supabase.rpc.bind(supabase) as unknown as (
+      functionName: "claim_employee_id",
+      args: { p_employee_code: string },
+    ) => PromiseLike<{ data: unknown; error: { message: string } | null }>;
+    const { error } = await claimEmployeeId("claim_employee_id", {
+      p_employee_code: employeeId.trim().toUpperCase(),
+    });
+    setBusy(false);
+    if (error) return toast.error(error.message || "Identifiant salarie invalide ou deja utilise");
+    sessionStorage.removeItem("wellwork-employee-onboarding");
+    toast.success("Compte salarie active");
+    refetch();
+    navigate({ to: "/employee/home", replace: true });
+  };
+
+  const joinWithManagerCode = async () => {
     if (!user || !inviteCode.trim()) return;
     setBusy(true);
     const { data, error } = await supabase.rpc("redeem_space_invite", { _code: inviteCode.trim() });
     setBusy(false);
-    if (error || !data || !data.length) return toast.error(error?.message || "Code d'invitation invalide ou expiré");
-    const role = data[0].role;
-    toast.success("Bienvenue dans votre espace");
+    if (error || !data || !data.length) return toast.error(error?.message || "Code manager invalide ou expire");
+    toast.success("Acces manager active");
     refetch();
-    navigate({ to: role === "employee" ? "/employee/home" : "/admin/dashboard", replace: true });
+    navigate({ to: "/admin/dashboard", replace: true });
   };
 
   if (authLoading || spaceLoading) {
@@ -122,11 +148,17 @@ function OnboardingPage() {
             <h1 className="text-2xl font-bold text-center mb-2">Bienvenue{user?.email ? `, ${user.email.split("@")[0]}` : ""}</h1>
             <p className="text-muted-foreground text-sm text-center mb-8">Comment souhaitez-vous utiliser Wellwork ?</p>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <button onClick={() => setMode("join_employee")} className="text-left p-6 rounded-2xl bg-background border hover:border-brand hover:bg-muted transition-all flex flex-col items-center text-center">
                 <KeyRound className="w-6 h-6 mb-3 text-brand" />
-                <div className="font-semibold text-sm">Salarié / Manager</div>
-                <div className="text-[10px] text-muted-foreground mt-1">J'ai un code d'invitation (WW-...)</div>
+                <div className="font-semibold text-sm">Salarié</div>
+                <div className="text-[10px] text-muted-foreground mt-1">J'ai mon identifiant employé (EMP-...)</div>
+              </button>
+
+              <button onClick={() => setMode("join_manager")} className="text-left p-6 rounded-2xl bg-background border hover:border-brand hover:bg-muted transition-all flex flex-col items-center text-center">
+                <KeyRound className="w-6 h-6 mb-3 text-brand" />
+                <div className="font-semibold text-sm">Manager RH</div>
+                <div className="text-[10px] text-muted-foreground mt-1">J'ai un code manager (WW-...)</div>
               </button>
               
               <button onClick={() => setMode("join_token")} className="text-left p-6 rounded-2xl bg-background border hover:border-brand hover:bg-muted transition-all flex flex-col items-center text-center">
@@ -168,7 +200,7 @@ function OnboardingPage() {
                 </div>
               </div>
               <div className="flex gap-2 pt-4">
-                <Button variant="outline" onClick={() => setMode("choose")} className="bg-transparent border-border text-foreground hover:bg-muted">Retour</Button>
+                <Button variant="outline" onClick={() => googleEmployeeFlow ? signOut() : setMode("choose")} className="bg-transparent border-border text-foreground hover:bg-muted">{googleEmployeeFlow ? "Changer de compte" : "Retour"}</Button>
                 <Button onClick={requestDemo} disabled={busy || !companyName.trim() || !contactName.trim()} className="flex-1 gradient-brand border-0 h-11">
                   {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : "Envoyer la demande"}
                 </Button>
@@ -223,16 +255,34 @@ function OnboardingPage() {
 
         {mode === "join_employee" && (
           <Card className="p-8 rounded-3xl glass-dark border-white/10 text-foreground">
-            <div className="flex items-center gap-3 mb-6"><KeyRound className="w-6 h-6 text-brand" /><h1 className="text-xl font-bold">Rejoindre avec un code</h1></div>
+            <div className="flex items-center gap-3 mb-6"><KeyRound className="w-6 h-6 text-brand" /><h1 className="text-xl font-bold">Activer mon compte salarié</h1></div>
             <div className="space-y-4">
-              <div><Label className="text-foreground/80">Code d'invitation</Label>
-                <Input value={inviteCode} onChange={(e) => setInviteCode(e.target.value.toUpperCase())} placeholder="Ex. WW-4G7K-9XZ2" className="mt-1 bg-background border-border text-foreground font-mono tracking-wider" />
-                <div className="text-[11px] text-muted-foreground mt-1">Code unique reçu de votre RH ou manager.</div>
+              <div><Label className="text-foreground/80">Identifiant employé</Label>
+                <Input value={employeeId} onChange={(e) => setEmployeeId(e.target.value.toUpperCase())} placeholder="Ex. EMP-0142" className="mt-1 bg-background border-border text-foreground font-mono tracking-wider" />
+                <div className="text-[11px] text-muted-foreground mt-1">Utilisez l'identifiant figurant dans le registre de votre entreprise. Votre identité de connexion reste privée.</div>
               </div>
               <div className="flex gap-2 pt-4">
                 <Button variant="outline" onClick={() => setMode("choose")} className="bg-transparent border-border text-foreground hover:bg-muted">Retour</Button>
-                <Button onClick={joinWithCode} disabled={busy || !inviteCode.trim()} className="flex-1 gradient-brand border-0 h-11">
-                  {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : "Rejoindre"}
+                <Button onClick={joinWithEmployeeId} disabled={busy || !employeeId.trim()} className="flex-1 gradient-brand border-0 h-11">
+                  {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : "Activer mon compte"}
+                </Button>
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {mode === "join_manager" && (
+          <Card className="p-8 rounded-3xl glass-dark border-white/10 text-foreground">
+            <div className="flex items-center gap-3 mb-6"><KeyRound className="w-6 h-6 text-brand" /><h1 className="text-xl font-bold">Accès manager RH</h1></div>
+            <div className="space-y-4">
+              <div><Label className="text-foreground/80">Code manager</Label>
+                <Input value={inviteCode} onChange={(e) => setInviteCode(e.target.value.toUpperCase())} placeholder="Ex. WW-4G7K-9XZ2" className="mt-1 bg-background border-border text-foreground font-mono tracking-wider" />
+                <div className="text-[11px] text-muted-foreground mt-1">Ce code est créé par l'administrateur. Vos modules seront limités aux permissions qu'il a choisies.</div>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" onClick={() => setMode("choose")} className="bg-transparent border-border text-foreground hover:bg-muted">Retour</Button>
+                <Button onClick={joinWithManagerCode} disabled={busy || !inviteCode.trim()} className="flex-1 gradient-brand border-0 h-11">
+                  {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : "Rejoindre l'espace manager"}
                 </Button>
               </div>
             </div>

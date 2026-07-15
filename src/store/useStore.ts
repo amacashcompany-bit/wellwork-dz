@@ -15,6 +15,7 @@ interface AppState {
   tenant: string;
   isDarkMode: boolean;
   isSidebarCollapsed: boolean;
+  isMobileNavOpen: boolean;
 
   employees: typeof employees;
   departments: typeof departments;
@@ -32,6 +33,7 @@ interface AppState {
   setRole: (role: Role) => void;
   toggleDarkMode: () => void;
   toggleSidebar: () => void;
+  setMobileNavOpen: (open: boolean) => void;
   addAnonymousPost: (post: AnonymousPost) => void;
   addReply: (postId: string, reply: Reply) => void;
   updateActionPlan: (id: string, updates: Partial<ActionPlan>) => void;
@@ -50,6 +52,7 @@ export const useStore = create<AppState>()(
       tenant: "TechDZ",
       isDarkMode: false,
       isSidebarCollapsed: false,
+      isMobileNavOpen: false,
 
       employees, departments, surveys, anonymousPosts, burnoutAlerts,
       actionPlans, wellnessContent, events, messageThreads, kpiData, chartData,
@@ -58,6 +61,7 @@ export const useStore = create<AppState>()(
       setRole: (role) => set({ role }),
       toggleDarkMode: () => set((s) => ({ isDarkMode: !s.isDarkMode })),
       toggleSidebar: () => set((s) => ({ isSidebarCollapsed: !s.isSidebarCollapsed })),
+      setMobileNavOpen: (open) => set({ isMobileNavOpen: open }),
       addAnonymousPost: (post) => set((s) => ({ anonymousPosts: [post, ...s.anonymousPosts] })),
       addReply: (postId, reply) => set((s) => ({
         anonymousPosts: s.anonymousPosts.map((p) => p.id === postId ? { ...p, replies: [...p.replies, reply] } : p),

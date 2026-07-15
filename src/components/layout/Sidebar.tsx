@@ -7,24 +7,25 @@ import {
 } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
 import { useStore } from "@/store/useStore";
-import { useMySpace, hasRole } from "@/hooks/useAuth";
+import { useMySpace, hasRole, useManagerPermissions } from "@/hooks/useAuth";
+import type { ManagerModule } from "@/lib/manager-access";
 import type { DictKey } from "@/lib/i18n";
 
-const adminItems: { to: string; icon: React.ComponentType<{ className?: string }>; key: DictKey; badge?: string }[] = [
+const adminItems: { to: string; icon: React.ComponentType<{ className?: string }>; key: DictKey; badge?: string; module?: ManagerModule; adminOnly?: boolean }[] = [
   { to: "/admin/dashboard", icon: LayoutDashboard, key: "dashboard" },
-  { to: "/admin/employees", icon: Users, key: "employees" },
-  { to: "/admin/team", icon: UserCog, key: "employees" },
-  { to: "/admin/surveys", icon: ScrollText, key: "surveys" },
-  { to: "/admin/anonymous", icon: ShieldQuestion, key: "anonymousSpace", badge: "3" },
-  { to: "/admin/burnout", icon: Bot, key: "burnoutEngine", badge: "!" },
-  { to: "/admin/alerts", icon: Bell, key: "alerts" },
-  { to: "/admin/actions", icon: Lightbulb, key: "actionPlans" },
-  { to: "/admin/events", icon: Calendar, key: "events" },
-  { to: "/admin/library", icon: BookOpen, key: "library" },
-  { to: "/admin/messages", icon: MessageSquare, key: "messages" },
-  { to: "/admin/erp", icon: Plug, key: "erp" },
-  { to: "/admin/reports", icon: BarChart3, key: "reports" },
-  { to: "/admin/settings", icon: Settings, key: "settings" },
+  { to: "/admin/employees", icon: Users, key: "employees", module: "employees" },
+  { to: "/admin/team", icon: UserCog, key: "employees", adminOnly: true },
+  { to: "/admin/surveys", icon: ScrollText, key: "surveys", module: "surveys" },
+  { to: "/admin/anonymous", icon: ShieldQuestion, key: "anonymousSpace", badge: "3", module: "alerts" },
+  { to: "/admin/burnout", icon: Bot, key: "burnoutEngine", badge: "!", module: "alerts" },
+  { to: "/admin/alerts", icon: Bell, key: "alerts", module: "alerts" },
+  { to: "/admin/actions", icon: Lightbulb, key: "actionPlans", module: "actions" },
+  { to: "/admin/events", icon: Calendar, key: "events", module: "events" },
+  { to: "/admin/library", icon: BookOpen, key: "library", module: "library" },
+  { to: "/admin/messages", icon: MessageSquare, key: "messages", module: "messages" },
+  { to: "/admin/erp", icon: Plug, key: "erp", module: "erp" },
+  { to: "/admin/reports", icon: BarChart3, key: "reports", module: "reports" },
+  { to: "/admin/settings", icon: Settings, key: "settings", adminOnly: true },
 ];
 
 const employeeItems: { to: string; icon: React.ComponentType<{ className?: string }>; key: DictKey; badge?: string }[] = [
@@ -45,7 +46,13 @@ export function Sidebar() {
   const { info } = useMySpace();
   const isSuperAdmin = hasRole(info?.roles ?? [], "super_admin");
   const isEmployee = hasRole(info?.roles ?? [], "employee");
-  const items = isEmployee ? employeeItems : adminItems;
+  const isManager = hasRole(info?.roles ?? [], "manager") && !hasRole(info?.roles ?? [], ["hr_admin", "super_admin"]);
+  const { permissions } = useManagerPermissions(info?.spaceId ?? null, isManager);
+  const items = isEmployee
+    ? employeeItems
+    : isManager
+      ? adminItems.filter((item) => !item.adminOnly && (!item.module || permissions.has(item.module)))
+      : adminItems;
   const location = useLocation();
   const isSidebarCollapsed = useStore((s) => s.isSidebarCollapsed);
   const toggleSidebar = useStore((s) => s.toggleSidebar);

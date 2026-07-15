@@ -12,13 +12,16 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SuperadminRouteImport } from './routes/superadmin'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as EmployeeRouteImport } from './routes/employee'
+import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as ActivateRouteImport } from './routes/activate'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SuperadminIndexRouteImport } from './routes/superadmin.index'
 import { Route as EmployeeIndexRouteImport } from './routes/employee.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as SuperadminPlansRouteImport } from './routes/superadmin.plans'
+import { Route as SuperadminBillingRouteImport } from './routes/superadmin.billing'
 import { Route as EmployeeSurveysRouteImport } from './routes/employee.surveys'
 import { Route as EmployeeMessagesRouteImport } from './routes/employee.messages'
 import { Route as EmployeeLibraryRouteImport } from './routes/employee.library'
@@ -26,6 +29,7 @@ import { Route as EmployeeHomeRouteImport } from './routes/employee.home'
 import { Route as EmployeeHelpRouteImport } from './routes/employee.help'
 import { Route as EmployeeFeedbackRouteImport } from './routes/employee.feedback'
 import { Route as EmployeeEventsRouteImport } from './routes/employee.events'
+import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as AdminTeamRouteImport } from './routes/admin.team'
 import { Route as AdminSurveysRouteImport } from './routes/admin.surveys'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
@@ -56,6 +60,11 @@ const EmployeeRoute = EmployeeRouteImport.update({
   path: '/employee',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -64,6 +73,11 @@ const AuthRoute = AuthRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ActivateRoute = ActivateRouteImport.update({
+  id: '/activate',
+  path: '/activate',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -89,6 +103,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
 const SuperadminPlansRoute = SuperadminPlansRouteImport.update({
   id: '/plans',
   path: '/plans',
+  getParentRoute: () => SuperadminRoute,
+} as any)
+const SuperadminBillingRoute = SuperadminBillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
   getParentRoute: () => SuperadminRoute,
 } as any)
 const EmployeeSurveysRoute = EmployeeSurveysRouteImport.update({
@@ -125,6 +144,11 @@ const EmployeeEventsRoute = EmployeeEventsRouteImport.update({
   id: '/events',
   path: '/events',
   getParentRoute: () => EmployeeRoute,
+} as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/callback',
+  path: '/callback',
+  getParentRoute: () => AuthRoute,
 } as any)
 const AdminTeamRoute = AdminTeamRouteImport.update({
   id: '/team',
@@ -199,8 +223,10 @@ const AdminActionsRoute = AdminActionsRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/activate': typeof ActivateRoute
   '/admin': typeof AdminRouteWithChildren
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
+  '/checkout': typeof CheckoutRoute
   '/employee': typeof EmployeeRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/superadmin': typeof SuperadminRouteWithChildren
@@ -218,6 +244,7 @@ export interface FileRoutesByFullPath {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/surveys': typeof AdminSurveysRoute
   '/admin/team': typeof AdminTeamRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/employee/events': typeof EmployeeEventsRoute
   '/employee/feedback': typeof EmployeeFeedbackRoute
   '/employee/help': typeof EmployeeHelpRoute
@@ -225,6 +252,7 @@ export interface FileRoutesByFullPath {
   '/employee/library': typeof EmployeeLibraryRoute
   '/employee/messages': typeof EmployeeMessagesRoute
   '/employee/surveys': typeof EmployeeSurveysRoute
+  '/superadmin/billing': typeof SuperadminBillingRoute
   '/superadmin/plans': typeof SuperadminPlansRoute
   '/admin/': typeof AdminIndexRoute
   '/employee/': typeof EmployeeIndexRoute
@@ -232,7 +260,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
+  '/activate': typeof ActivateRoute
+  '/auth': typeof AuthRouteWithChildren
+  '/checkout': typeof CheckoutRoute
   '/onboarding': typeof OnboardingRoute
   '/admin/actions': typeof AdminActionsRoute
   '/admin/alerts': typeof AdminAlertsRoute
@@ -248,6 +278,7 @@ export interface FileRoutesByTo {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/surveys': typeof AdminSurveysRoute
   '/admin/team': typeof AdminTeamRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/employee/events': typeof EmployeeEventsRoute
   '/employee/feedback': typeof EmployeeFeedbackRoute
   '/employee/help': typeof EmployeeHelpRoute
@@ -255,6 +286,7 @@ export interface FileRoutesByTo {
   '/employee/library': typeof EmployeeLibraryRoute
   '/employee/messages': typeof EmployeeMessagesRoute
   '/employee/surveys': typeof EmployeeSurveysRoute
+  '/superadmin/billing': typeof SuperadminBillingRoute
   '/superadmin/plans': typeof SuperadminPlansRoute
   '/admin': typeof AdminIndexRoute
   '/employee': typeof EmployeeIndexRoute
@@ -263,8 +295,10 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/activate': typeof ActivateRoute
   '/admin': typeof AdminRouteWithChildren
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
+  '/checkout': typeof CheckoutRoute
   '/employee': typeof EmployeeRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/superadmin': typeof SuperadminRouteWithChildren
@@ -282,6 +316,7 @@ export interface FileRoutesById {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/surveys': typeof AdminSurveysRoute
   '/admin/team': typeof AdminTeamRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/employee/events': typeof EmployeeEventsRoute
   '/employee/feedback': typeof EmployeeFeedbackRoute
   '/employee/help': typeof EmployeeHelpRoute
@@ -289,6 +324,7 @@ export interface FileRoutesById {
   '/employee/library': typeof EmployeeLibraryRoute
   '/employee/messages': typeof EmployeeMessagesRoute
   '/employee/surveys': typeof EmployeeSurveysRoute
+  '/superadmin/billing': typeof SuperadminBillingRoute
   '/superadmin/plans': typeof SuperadminPlansRoute
   '/admin/': typeof AdminIndexRoute
   '/employee/': typeof EmployeeIndexRoute
@@ -298,8 +334,10 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/activate'
     | '/admin'
     | '/auth'
+    | '/checkout'
     | '/employee'
     | '/onboarding'
     | '/superadmin'
@@ -317,6 +355,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/surveys'
     | '/admin/team'
+    | '/auth/callback'
     | '/employee/events'
     | '/employee/feedback'
     | '/employee/help'
@@ -324,6 +363,7 @@ export interface FileRouteTypes {
     | '/employee/library'
     | '/employee/messages'
     | '/employee/surveys'
+    | '/superadmin/billing'
     | '/superadmin/plans'
     | '/admin/'
     | '/employee/'
@@ -331,7 +371,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/activate'
     | '/auth'
+    | '/checkout'
     | '/onboarding'
     | '/admin/actions'
     | '/admin/alerts'
@@ -347,6 +389,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/surveys'
     | '/admin/team'
+    | '/auth/callback'
     | '/employee/events'
     | '/employee/feedback'
     | '/employee/help'
@@ -354,6 +397,7 @@ export interface FileRouteTypes {
     | '/employee/library'
     | '/employee/messages'
     | '/employee/surveys'
+    | '/superadmin/billing'
     | '/superadmin/plans'
     | '/admin'
     | '/employee'
@@ -361,8 +405,10 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/activate'
     | '/admin'
     | '/auth'
+    | '/checkout'
     | '/employee'
     | '/onboarding'
     | '/superadmin'
@@ -380,6 +426,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/surveys'
     | '/admin/team'
+    | '/auth/callback'
     | '/employee/events'
     | '/employee/feedback'
     | '/employee/help'
@@ -387,6 +434,7 @@ export interface FileRouteTypes {
     | '/employee/library'
     | '/employee/messages'
     | '/employee/surveys'
+    | '/superadmin/billing'
     | '/superadmin/plans'
     | '/admin/'
     | '/employee/'
@@ -395,8 +443,10 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ActivateRoute: typeof ActivateRoute
   AdminRoute: typeof AdminRouteWithChildren
-  AuthRoute: typeof AuthRoute
+  AuthRoute: typeof AuthRouteWithChildren
+  CheckoutRoute: typeof CheckoutRoute
   EmployeeRoute: typeof EmployeeRouteWithChildren
   OnboardingRoute: typeof OnboardingRoute
   SuperadminRoute: typeof SuperadminRouteWithChildren
@@ -425,6 +475,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EmployeeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -437,6 +494,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/activate': {
+      id: '/activate'
+      path: '/activate'
+      fullPath: '/activate'
+      preLoaderRoute: typeof ActivateRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -472,6 +536,13 @@ declare module '@tanstack/react-router' {
       path: '/plans'
       fullPath: '/superadmin/plans'
       preLoaderRoute: typeof SuperadminPlansRouteImport
+      parentRoute: typeof SuperadminRoute
+    }
+    '/superadmin/billing': {
+      id: '/superadmin/billing'
+      path: '/billing'
+      fullPath: '/superadmin/billing'
+      preLoaderRoute: typeof SuperadminBillingRouteImport
       parentRoute: typeof SuperadminRoute
     }
     '/employee/surveys': {
@@ -522,6 +593,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/employee/events'
       preLoaderRoute: typeof EmployeeEventsRouteImport
       parentRoute: typeof EmployeeRoute
+    }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof AuthRoute
     }
     '/admin/team': {
       id: '/admin/team'
@@ -662,6 +740,16 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface AuthRouteChildren {
+  AuthCallbackRoute: typeof AuthCallbackRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthCallbackRoute: AuthCallbackRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
 interface EmployeeRouteChildren {
   EmployeeEventsRoute: typeof EmployeeEventsRoute
   EmployeeFeedbackRoute: typeof EmployeeFeedbackRoute
@@ -689,11 +777,13 @@ const EmployeeRouteWithChildren = EmployeeRoute._addFileChildren(
 )
 
 interface SuperadminRouteChildren {
+  SuperadminBillingRoute: typeof SuperadminBillingRoute
   SuperadminPlansRoute: typeof SuperadminPlansRoute
   SuperadminIndexRoute: typeof SuperadminIndexRoute
 }
 
 const SuperadminRouteChildren: SuperadminRouteChildren = {
+  SuperadminBillingRoute: SuperadminBillingRoute,
   SuperadminPlansRoute: SuperadminPlansRoute,
   SuperadminIndexRoute: SuperadminIndexRoute,
 }
@@ -704,8 +794,10 @@ const SuperadminRouteWithChildren = SuperadminRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ActivateRoute: ActivateRoute,
   AdminRoute: AdminRouteWithChildren,
-  AuthRoute: AuthRoute,
+  AuthRoute: AuthRouteWithChildren,
+  CheckoutRoute: CheckoutRoute,
   EmployeeRoute: EmployeeRouteWithChildren,
   OnboardingRoute: OnboardingRoute,
   SuperadminRoute: SuperadminRouteWithChildren,

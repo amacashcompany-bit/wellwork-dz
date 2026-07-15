@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Loader2,  LayoutDashboard, LogOut, User, Image, Home, Settings, Moon, Sun, Globe, MoreVertical, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { Loader2, LayoutDashboard, LogOut, User, Home, Settings, Moon, Sun, Globe, MoreVertical, PanelLeftClose, PanelLeftOpen, Menu, CreditCard } from "lucide-react";
 import { useAuth, useMySpace, hasRole } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import logoMark from "@/assets/brand/wellwork-logo-mark.png";
@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { MobileNavigation } from "@/components/layout/MobileNavigation";
 
 export const Route = createFileRoute("/superadmin")({
   ssr: false,
@@ -30,6 +31,7 @@ function SuperAdminLayout() {
   const toggleDark = useStore((s) => s.toggleDarkMode);
   const isSidebarCollapsed = useStore((s) => s.isSidebarCollapsed);
   const toggleSidebar = useStore((s) => s.toggleSidebar);
+  const setMobileNavOpen = useStore((s) => s.setMobileNavOpen);
   const currentLang = LANGS.find((l) => l.code === language) || LANGS[0];
 
   // Profile Customization state
@@ -99,9 +101,32 @@ function SuperAdminLayout() {
   ];
 
   return (
-    <div className="min-h-screen bg-background flex flex-col md:flex-row">
+    <div className="min-h-screen bg-background md:flex">
+      <header className="fixed inset-x-0 top-0 z-40 flex h-16 items-center gap-3 border-b border-border/60 bg-card/95 px-4 backdrop-blur-xl md:hidden">
+        <Button variant="ghost" size="icon" onClick={() => setMobileNavOpen(true)} className="h-9 w-9 shrink-0 text-muted-foreground" aria-label="Open navigation">
+          <Menu className="h-5 w-5" />
+        </Button>
+        <Link to="/superadmin" className="flex min-w-0 items-center gap-2">
+          <img src={logoMark} alt="Wellwork" className="h-8 w-8 shrink-0 object-contain" />
+          <div className="min-w-0">
+            <div className="truncate font-display text-sm font-bold leading-tight">Wellwork</div>
+            <div className="truncate text-[10px] font-semibold text-brand">{t("saMasterAdmin")}</div>
+          </div>
+        </Link>
+        <div className="flex-1" />
+        <Button variant="ghost" size="icon" onClick={() => setIsProfileOpen(true)} className="h-9 w-9 shrink-0" aria-label={t("profile")}>
+          {profileAvatar ? (
+            <img src={profileAvatar} className="h-8 w-8 rounded-full border border-brand/20 object-cover" alt="Avatar" />
+          ) : (
+            <span className="grid h-8 w-8 place-items-center rounded-full bg-brand text-xs font-bold text-white">
+              {profileName ? profileName.slice(0, 2).toUpperCase() : "AD"}
+            </span>
+          )}
+        </Button>
+      </header>
+
       {/* Sidebar for Super Admin */}
-      <aside className={`w-full ${isSidebarCollapsed ? "md:w-20" : "md:w-64"} border-b md:border-b-0 md:border-r border-border/40 bg-card flex flex-col transition-all duration-300 ease-in-out`}>
+      <aside className={`hidden ${isSidebarCollapsed ? "md:w-20" : "md:w-64"} shrink-0 border-r border-border/40 bg-card md:flex md:flex-col transition-all duration-300 ease-in-out`}>
         <div className="p-4 md:p-6 flex items-center justify-between">
           <Link to="/" className={`flex items-center ${isSidebarCollapsed ? "justify-center hidden" : "gap-2"}`}>
             <img src={logoMark} alt="Wellwork" className="w-8 h-8 object-contain drop-shadow-[0_2px_8px_rgba(16,185,129,0.35)] shrink-0" />
@@ -136,6 +161,16 @@ function SuperAdminLayout() {
           >
             <Settings className="w-4 h-4 shrink-0" />
             {!isSidebarCollapsed && <span className="truncate">{t("saPlansAndPricing")}</span>}
+          </Link>
+          <Link
+            to="/superadmin/billing"
+            title={isSidebarCollapsed ? "Paiements" : undefined}
+            activeProps={{ className: "bg-brand/10 text-brand" }}
+            inactiveProps={{ className: "text-muted-foreground hover:bg-muted/50 hover:text-foreground" }}
+            className={`flex items-center ${isSidebarCollapsed ? "justify-center" : "gap-3"} px-3 py-2.5 rounded-xl text-sm font-medium transition-colors`}
+          >
+            <CreditCard className="w-4 h-4 shrink-0" />
+            {!isSidebarCollapsed && <span className="truncate">Paiements</span>}
           </Link>
 
           <div className="pt-6">
@@ -235,11 +270,13 @@ function SuperAdminLayout() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto">
-        <div className="p-6 md:p-10 max-w-7xl mx-auto">
+      <main className="flex-1 overflow-y-auto pt-16 pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:pt-0 md:pb-0">
+        <div className="p-4 md:p-10 max-w-7xl mx-auto">
           <Outlet />
         </div>
       </main>
+
+      <MobileNavigation variant="superadmin" />
 
       {/* Profile Dialog */}
       <Dialog open={isProfileOpen} onOpenChange={setIsProfileOpen}>

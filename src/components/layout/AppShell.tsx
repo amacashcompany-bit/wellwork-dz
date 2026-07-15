@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "@tanstack/react-router";
 import { TopNav } from "./TopNav";
 import { Sidebar } from "./Sidebar";
+import { MobileNavigation } from "./MobileNavigation";
 import { useI18n } from "@/hooks/useI18n";
 import { useThemeSync } from "@/hooks/useTheme";
 import { Toaster } from "@/components/ui/sonner";
@@ -23,7 +24,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className={`min-h-screen bg-background ${direction === "rtl" ? "font-arabic" : ""}`}>
       <TopNav />
       <Sidebar />
-      <main className={`${mainPadding} pt-16 min-h-screen transition-all duration-300 ease-in-out`}>
+      <main className={`${mainPadding} pt-16 pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:pb-0 min-h-screen transition-all duration-300 ease-in-out`}>
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}
@@ -37,6 +38,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </motion.div>
         </AnimatePresence>
       </main>
+      <MobileNavigation />
       <Toaster position="top-center" richColors />
     </div>
   );

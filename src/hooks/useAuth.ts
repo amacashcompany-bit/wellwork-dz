@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { User } from "@supabase/supabase-js";
+import type { PostgrestError, User } from "@supabase/supabase-js";
 
 export type AppRole = "super_admin" | "hr_admin" | "manager" | "employee";
 
@@ -9,6 +9,21 @@ export interface MySpaceInfo {
   spaceName: string | null;
   spaceSlug: string | null;
   roles: AppRole[];
+}
+
+function isAppRole(role: unknown): role is AppRole {
+  return typeof role === "string" && ["super_admin", "hr_admin", "manager", "employee"].includes(role);
+}
+
+function parseMySpace(data: unknown): MySpaceInfo | null {
+  if (!data || typeof data !== "object" || Array.isArray(data)) return null;
+  const value = data as Record<string, unknown>;
+  return {
+    spaceId: typeof value.spaceId === "string" ? value.spaceId : null,
+    spaceName: typeof value.spaceName === "string" ? value.spaceName : null,
+    spaceSlug: typeof value.spaceSlug === "string" ? value.spaceSlug : null,
+    roles: Array.isArray(value.roles) ? value.roles.filter(isAppRole) : [],
+  };
 }
 
 export function useAuth() {
@@ -49,6 +64,21 @@ export function useMySpace(): { info: MySpaceInfo | null; loading: boolean; refe
       const uid = userRes.user?.id;
       if (!uid) { if (mounted) { setInfo(null); setLoading(false); } return; }
 
+      // The generated database types are refreshed separately after migrations deploy.
+      const getMySpace = supabase.rpc.bind(supabase) as unknown as (
+        functionName: "get_my_space",
+      ) => PromiseLike<{ data: unknown; error: PostgrestError | null }>;
+      const { data: context, error: contextError } = await getMySpace("get_my_space");
+      const parsedContext = parseMySpace(context);
+      if (!contextError && parsedContext) {
+        if (mounted) {
+          setInfo(parsedContext);
+          setLoading(false);
+        }
+        return;
+      }
+
+      // Compatibility fallback while the get_my_space migration is being deployed.
       const { data: profile } = await supabase.from("profiles").select("current_space_id").eq("id", uid).maybeSingle();
       let spaceId = profile?.current_space_id ?? null;
 
@@ -57,6 +87,18 @@ export function useMySpace(): { info: MySpaceInfo | null; loading: boolean; refe
         const { data: mem } = await supabase.from("space_members").select("space_id").eq("user_id", uid).limit(1);
         spaceId = mem?.[0]?.space_id ?? null;
         if (spaceId) await supabase.from("profiles").upsert({ id: uid, current_space_id: spaceId });
+      }
+
+      // Spaces created by an older trial flow may have an owner but no membership row.
+      if (!spaceId) {
+        const { data: owned } = await supabase.from("spaces").select("id").eq("owner_id", uid).limit(1);
+        spaceId = owned?.[0]?.id ?? null;
+        if (spaceId) {
+          await Promise.all([
+            supabase.from("space_members").upsert({ space_id: spaceId, user_id: uid }),
+            supabase.from("profiles").upsert({ id: uid, current_space_id: spaceId }),
+          ]);
+        }
       }
 
       if (!spaceId) {
@@ -95,4 +137,39 @@ export function useMySpace(): { info: MySpaceInfo | null; loading: boolean; refe
 export function hasRole(roles: AppRole[], want: AppRole | AppRole[]): boolean {
   const arr = Array.isArray(want) ? want : [want];
   return roles.some((r) => arr.includes(r));
+}
+
+export function useManagerPermissions(spaceId: string | null, enabled: boolean) {
+  const [permissions, setPermissions] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(enabled);
+
+  useEffect(() => {
+    let mounted = true;
+    if (!enabled || !spaceId) {
+      setPermissions(new Set());
+      setLoading(false);
+      return () => { mounted = false; };
+    }
+
+    setLoading(true);
+    (async () => {
+      try {
+        const { data } = await supabase
+          .from("manager_permissions")
+          .select("module")
+          .eq("space_id", spaceId);
+        if (!mounted) return;
+        setPermissions(new Set((data ?? []).map((permission) => permission.module)));
+        setLoading(false);
+      } catch {
+        if (!mounted) return;
+        setPermissions(new Set());
+        setLoading(false);
+      }
+    })();
+
+    return () => { mounted = false; };
+  }, [enabled, spaceId]);
+
+  return { permissions, loading };
 }
