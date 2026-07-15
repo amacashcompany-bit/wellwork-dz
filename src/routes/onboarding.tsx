@@ -2,7 +2,8 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
-import { Building2, KeyRound, Loader2, Plus, Sparkles, Send, CheckCircle2 } from "lucide-react";
+import { Building2, KeyRound, Loader2, Plus, Send, CheckCircle2 } from "lucide-react";
+import logoMark from "@/assets/brand/wellwork-logo-mark.png";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, useMySpace } from "@/hooks/useAuth";
 import { Card } from "@/components/ui/card";
@@ -112,9 +113,7 @@ function OnboardingPage() {
     <div className="min-h-screen gradient-mesh flex items-center justify-center px-4 py-12 text-foreground">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-2xl">
         <Link to="/" className="flex items-center gap-2 justify-center mb-6">
-          <div className="w-10 h-10 rounded-xl gradient-brand flex items-center justify-center shadow-glow">
-            <Sparkles className="w-5 h-5 text-white" />
-          </div>
+          <img src={logoMark} alt="Wellwork" className="w-10 h-10 object-contain drop-shadow-[0_2px_8px_rgba(16,185,129,0.35)]" />
           <div className="font-display font-bold text-lg">Wellwork</div>
         </Link>
 

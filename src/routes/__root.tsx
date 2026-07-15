@@ -9,6 +9,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import { useThemeSync } from "@/hooks/useTheme";
+import { SplashScreen } from "@/components/layout/SplashScreen";
 
 function NotFoundComponent() {
   return (
@@ -98,6 +99,7 @@ function RootComponent() {
   }, [router, queryClient]);
   return (
     <QueryClientProvider client={queryClient}>
+      <SplashScreen />
       <Outlet />
     </QueryClientProvider>
   );

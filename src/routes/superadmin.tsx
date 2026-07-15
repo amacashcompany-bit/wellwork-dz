@@ -1,7 +1,9 @@
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Loader2, Sparkles, LayoutDashboard, LogOut, User, Image, Home, Settings, Moon, Sun, Globe, MoreVertical, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { Loader2,  LayoutDashboard, LogOut, User, Image, Home, Settings, Moon, Sun, Globe, MoreVertical, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { useAuth, useMySpace, hasRole } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
+import logoMark from "@/assets/brand/wellwork-logo-mark.png";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
@@ -102,9 +104,7 @@ function SuperAdminLayout() {
       <aside className={`w-full ${isSidebarCollapsed ? "md:w-20" : "md:w-64"} border-b md:border-b-0 md:border-r border-border/40 bg-card flex flex-col transition-all duration-300 ease-in-out`}>
         <div className="p-4 md:p-6 flex items-center justify-between">
           <Link to="/" className={`flex items-center ${isSidebarCollapsed ? "justify-center hidden" : "gap-2"}`}>
-            <div className="w-8 h-8 rounded-lg gradient-brand flex items-center justify-center shadow-glow shrink-0">
-              <Sparkles className="w-4 h-4 text-white" />
-            </div>
+            <img src={logoMark} alt="Wellwork" className="w-8 h-8 object-contain drop-shadow-[0_2px_8px_rgba(16,185,129,0.35)] shrink-0" />
             <div className="overflow-hidden">
               <div className="font-display font-bold leading-tight truncate">Wellwork</div>
               <div className="text-[9px] uppercase tracking-widest text-brand font-semibold truncate">{t("saMasterAdmin")}</div>
