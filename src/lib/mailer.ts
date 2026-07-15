@@ -40,7 +40,7 @@ export const sendAccessTokenEmail = createServerFn({ method: "POST" })
         <p>Pour commencer, veuillez utiliser ce code d'accès lors de la création de votre compte sur notre plateforme.</p>
         
         <div style="text-align: center; margin: 30px 0;">
-          <a href="https://wellwork.dz/auth" style="background-color: #10B981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
+          <a href="https://wellwork.site/auth" style="background-color: #10B981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
             Accéder à la plateforme
           </a>
         </div>

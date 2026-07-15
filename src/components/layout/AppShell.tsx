@@ -12,12 +12,17 @@ export function AppShell({ children }: { children: ReactNode }) {
   useThemeSync();
   const { direction } = useI18n();
   const location = useLocation();
+  const isSidebarCollapsed = useStore((s) => s.isSidebarCollapsed);
+
+  const mainPadding = direction === "rtl" 
+    ? (isSidebarCollapsed ? "md:pr-[80px]" : "md:pr-64") 
+    : (isSidebarCollapsed ? "md:pl-[80px]" : "md:pl-64");
 
   return (
     <div className={`min-h-screen bg-background ${direction === "rtl" ? "font-arabic" : ""}`}>
       <TopNav />
       <Sidebar />
-      <main className={`${direction === "rtl" ? "md:pr-64" : "md:pl-64"} pt-16 min-h-screen`}>
+      <main className={`${mainPadding} pt-16 min-h-screen transition-all duration-300 ease-in-out`}>
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}

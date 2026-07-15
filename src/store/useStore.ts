@@ -14,6 +14,7 @@ interface AppState {
   role: Role;
   tenant: string;
   isDarkMode: boolean;
+  isSidebarCollapsed: boolean;
 
   employees: typeof employees;
   departments: typeof departments;
@@ -30,6 +31,7 @@ interface AppState {
   setLanguage: (lang: Lang) => void;
   setRole: (role: Role) => void;
   toggleDarkMode: () => void;
+  toggleSidebar: () => void;
   addAnonymousPost: (post: AnonymousPost) => void;
   addReply: (postId: string, reply: Reply) => void;
   updateActionPlan: (id: string, updates: Partial<ActionPlan>) => void;
@@ -47,6 +49,7 @@ export const useStore = create<AppState>()(
       role: "admin",
       tenant: "TechDZ",
       isDarkMode: false,
+      isSidebarCollapsed: false,
 
       employees, departments, surveys, anonymousPosts, burnoutAlerts,
       actionPlans, wellnessContent, events, messageThreads, kpiData, chartData,
@@ -54,6 +57,7 @@ export const useStore = create<AppState>()(
       setLanguage: (lang) => set({ language: lang, direction: lang === "ar" ? "rtl" : "ltr" }),
       setRole: (role) => set({ role }),
       toggleDarkMode: () => set((s) => ({ isDarkMode: !s.isDarkMode })),
+      toggleSidebar: () => set((s) => ({ isSidebarCollapsed: !s.isSidebarCollapsed })),
       addAnonymousPost: (post) => set((s) => ({ anonymousPosts: [post, ...s.anonymousPosts] })),
       addReply: (postId, reply) => set((s) => ({
         anonymousPosts: s.anonymousPosts.map((p) => p.id === postId ? { ...p, replies: [...p.replies, reply] } : p),
@@ -78,7 +82,7 @@ export const useStore = create<AppState>()(
     }),
     {
       name: "qvt-care-storage",
-      partialize: (s) => ({ language: s.language, direction: s.direction, isDarkMode: s.isDarkMode, role: s.role }),
+      partialize: (s) => ({ language: s.language, direction: s.direction, isDarkMode: s.isDarkMode, role: s.role, isSidebarCollapsed: s.isSidebarCollapsed }),
     }
   )
 );

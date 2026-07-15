@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import {
   BarChart3, Bell, BookOpen, Bot, Calendar, HelpCircle, Home, Inbox, LayoutDashboard,
   Lightbulb, MessageSquare, Plug, ScrollText, Settings, ShieldQuestion, Users, UserCog,
+  PanelLeftClose, PanelLeftOpen
 } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
 import { useStore } from "@/store/useStore";
@@ -46,14 +47,16 @@ export function Sidebar() {
   const isEmployee = hasRole(info?.roles ?? [], "employee");
   const items = isEmployee ? employeeItems : adminItems;
   const location = useLocation();
+  const isSidebarCollapsed = useStore((s) => s.isSidebarCollapsed);
+  const toggleSidebar = useStore((s) => s.toggleSidebar);
 
   return (
     <aside
-      className={`fixed top-16 bottom-0 w-64 bg-sidebar text-sidebar-foreground border-sidebar-border ${
+      className={`fixed top-16 bottom-0 ${isSidebarCollapsed ? "w-20" : "w-64"} bg-sidebar text-sidebar-foreground border-sidebar-border ${
         direction === "rtl" ? "right-0 border-l" : "left-0 border-r"
-      } overflow-y-auto py-4 px-3 hidden md:block z-40`}
+      } overflow-y-auto py-4 px-3 hidden md:flex flex-col z-40 transition-all duration-300 ease-in-out`}
     >
-      <nav className="space-y-0.5">
+      <nav className="space-y-0.5 flex-1">
         {items.map((item) => {
           const active = location.pathname === item.to || location.pathname.startsWith(item.to + "/");
           const Icon = item.icon;
@@ -61,7 +64,8 @@ export function Sidebar() {
             <Link
               key={item.to}
               to={item.to}
-              className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors ${
+              title={isSidebarCollapsed ? t(item.key) : undefined}
+              className={`relative flex items-center ${isSidebarCollapsed ? "justify-center" : "gap-3"} px-3 py-2.5 rounded-xl text-sm transition-colors ${
                 active ? "text-white" : "text-sidebar-foreground/70 hover:text-white hover:bg-white/5"
               }`}
             >
@@ -73,11 +77,15 @@ export function Sidebar() {
                 />
               )}
               <Icon className="w-4 h-4 relative z-10 shrink-0" />
-              <span className="relative z-10 flex-1 truncate">{t(item.key)}</span>
-              {item.badge && (
-                <span className={`relative z-10 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-                  item.badge === "!" ? "bg-danger text-white" : "bg-white/20 text-white"
-                }`}>{item.badge}</span>
+              {!isSidebarCollapsed && (
+                <>
+                  <span className="relative z-10 flex-1 truncate">{t(item.key)}</span>
+                  {item.badge && (
+                    <span className={`relative z-10 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                      item.badge === "!" ? "bg-danger text-white" : "bg-white/20 text-white"
+                    }`}>{item.badge}</span>
+                  )}
+                </>
               )}
             </Link>
           );
@@ -85,7 +93,7 @@ export function Sidebar() {
 
         {isSuperAdmin && (
           <>
-            <div className="mt-4 mb-1 px-3 text-[10px] uppercase tracking-widest text-sidebar-foreground/40">
+            <div className={`mt-4 mb-1 px-3 text-[10px] uppercase tracking-widest text-sidebar-foreground/40 ${isSidebarCollapsed ? "text-center hidden" : ""}`}>
               {pick("Super admin", "المشرف العام", "Super admin")}
             </div>
             {superAdminItems.map((item) => {
@@ -95,7 +103,8 @@ export function Sidebar() {
                 <Link
                   key={item.to}
                   to={item.to}
-                  className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors ${
+                  title={isSidebarCollapsed ? pick(...item.label) : undefined}
+                  className={`relative flex items-center ${isSidebarCollapsed ? "justify-center" : "gap-3"} px-3 py-2.5 rounded-xl text-sm transition-colors ${
                     active ? "text-white" : "text-sidebar-foreground/70 hover:text-white hover:bg-white/5"
                   }`}
                 >
@@ -107,7 +116,9 @@ export function Sidebar() {
                     />
                   )}
                   <Icon className="w-4 h-4 relative z-10 shrink-0" />
-                  <span className="relative z-10 flex-1 truncate">{pick(...item.label)}</span>
+                  {!isSidebarCollapsed && (
+                    <span className="relative z-10 flex-1 truncate">{pick(...item.label)}</span>
+                  )}
                 </Link>
               );
             })}
@@ -115,10 +126,25 @@ export function Sidebar() {
         )}
       </nav>
 
-      <div className="mt-6 px-3 py-4 rounded-2xl bg-white/5 border border-white/10">
-        <div className="text-xs text-white/60 mb-2">Version</div>
-        <div className="text-sm font-medium text-white">QVT-Care · 2.0</div>
-        <div className="mt-3 text-[10px] text-white/50">Prototype · Master Thesis Edition</div>
+      <div className="mt-auto space-y-4">
+        {!isSidebarCollapsed && (
+          <div className="px-3 py-4 rounded-2xl bg-white/5 border border-white/10">
+            <div className="text-xs text-white/60 mb-2">Version</div>
+            <div className="text-sm font-medium text-white">QVT-Care · 2.0</div>
+            <div className="mt-3 text-[10px] text-white/50">Prototype · Master Thesis Edition</div>
+          </div>
+        )}
+
+        <button 
+          onClick={toggleSidebar}
+          className={`flex items-center ${isSidebarCollapsed ? "justify-center" : "gap-3 px-3"} py-2.5 w-full rounded-xl text-sm text-sidebar-foreground/70 hover:text-white hover:bg-white/5 transition-colors`}
+        >
+          {direction === "rtl" 
+            ? (isSidebarCollapsed ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />)
+            : (isSidebarCollapsed ? <PanelLeftOpen className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />)
+          }
+          {!isSidebarCollapsed && <span className="truncate">{pick("Réduire", "تصغير", "Collapse")}</span>}
+        </button>
       </div>
     </aside>
   );
