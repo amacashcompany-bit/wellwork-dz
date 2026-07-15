@@ -139,9 +139,9 @@ function Landing() {
             </motion.div>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }}
               className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
-              {["Anonymat cryptographique", "Multi-tenant natif", "IA burn-out", "Rapports Loi 18-07"].map((t) => (
-                <div key={t} className="flex items-center gap-1.5">
-                  <Check className="w-3.5 h-3.5 text-leaf" /> {t}
+              {[t("landingFeature1"), t("landingFeature2"), t("landingFeature3"), t("landingFeature4")].map((feat) => (
+                <div key={feat} className="flex items-center gap-1.5">
+                  <Check className="w-3.5 h-3.5 text-leaf" /> {feat}
                 </div>
               ))}
             </motion.div>
@@ -159,7 +159,7 @@ function Landing() {
                 <HeartPulse className="w-5 h-5" />
               </div>
               <div className="min-w-0">
-                <div className="text-xs text-muted-foreground">Score QVT équipe</div>
+                <div className="text-xs text-muted-foreground">{t("landingScore")}</div>
                 <div className="font-semibold text-lg leading-tight">78<span className="text-sm text-muted-foreground">/100</span> <span className="text-leaf-deep text-xs font-medium">+6.4%</span></div>
               </div>
             </div>
@@ -168,7 +168,7 @@ function Landing() {
                 <ShieldCheck className="w-5 h-5" />
               </div>
               <div className="text-xs">
-                <div className="font-semibold">Anonymat garanti</div>
+                <div className="font-semibold">{t("landingAnon")}</div>
                 <div className="text-muted-foreground">k ≥ 5 · AES-GCM</div>
               </div>
             </div>
@@ -177,7 +177,7 @@ function Landing() {
 
         {/* Trust bar */}
         <div className="relative max-w-7xl mx-auto mt-20">
-          <div className="text-center text-xs uppercase tracking-widest text-muted-foreground mb-4">Ils bâtissent une culture QVT durable</div>
+          <div className="text-center text-xs uppercase tracking-widest text-muted-foreground mb-4">{t("landingTrust")}</div>
           <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3 opacity-70">
             {["Sonatrach", "CNAS", "Djezzy", "BNA", "Cosider", "Cevital"].map((n) => (
               <div key={n} className="font-display font-semibold text-lg text-muted-foreground/80">{n}</div>
@@ -190,15 +190,15 @@ function Landing() {
       <section id="insights" className="py-24 px-6 bg-muted/30 border-y border-border/50">
         <div className="max-w-6xl mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-14">
-            <div className="text-xs uppercase tracking-widest text-leaf-deep font-semibold mb-3">Notre impact</div>
-            <h2 className="text-3xl md:text-5xl font-bold font-display tracking-tight">Ce que change une approche préventive.</h2>
-            <p className="mt-4 text-muted-foreground">Les organisations qui écoutent tôt évitent la crise. Voici ce que nos clients observent en 6 mois.</p>
+            <div className="text-xs uppercase tracking-widest text-leaf-deep font-semibold mb-3">{t("landingImpactTag")}</div>
+            <h2 className="text-3xl md:text-5xl font-bold font-display tracking-tight">{t("landingImpactTitle")}</h2>
+            <p className="mt-4 text-muted-foreground">{t("landingImpactDesc")}</p>
           </div>
           <div className="grid md:grid-cols-3 gap-4">
             {[
-              { value: "13.3%", label: "de turnover en moins", tone: "bg-card border" },
-              { value: "33%", label: "d'engagement en plus", tone: "gradient-leaf text-white border-0" },
-              { value: "500%", label: "de ROI QVT", tone: "bg-primary text-primary-foreground border-0" },
+              { value: "13.3%", label: t("landingImpactStat1"), tone: "bg-card border" },
+              { value: "33%", label: t("landingImpactStat2"), tone: "gradient-leaf text-white border-0" },
+              { value: "500%", label: t("landingImpactStat3"), tone: "bg-primary text-primary-foreground border-0" },
             ].map((s) => (
               <div key={s.label} className={`rounded-3xl p-8 md:p-10 ${s.tone}`}>
                 <div className="text-5xl md:text-6xl font-bold font-display tracking-tight">{s.value}</div>
@@ -213,15 +213,15 @@ function Landing() {
       <section id="platform" className="py-24 px-6">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-14 items-center">
           <div>
-            <div className="text-xs uppercase tracking-widest text-leaf-deep font-semibold mb-3">Une suite intégrée</div>
-            <h2 className="text-3xl md:text-5xl font-bold font-display tracking-tight">Une plateforme pour les RH <br />et les managers de terrain.</h2>
-            <p className="mt-5 text-muted-foreground max-w-lg">Pulse, feedback anonyme, alertes IA, plans d'action, bibliothèque bien-être et rapports de conformité — tout dans un espace unique, chiffré et multi-tenant.</p>
+            <div className="text-xs uppercase tracking-widest text-leaf-deep font-semibold mb-3">{t("landingSuiteTag")}</div>
+            <h2 className="text-3xl md:text-5xl font-bold font-display tracking-tight">{t("landingSuiteTitle")}</h2>
+            <p className="mt-5 text-muted-foreground max-w-lg">{t("landingSuiteDesc")}</p>
             <ul className="mt-8 space-y-4">
               {[
-                { icon: LineChart, t: "Pulse hebdomadaire", d: "Mesure continue, anonymat strict, seuils k ≥ 5" },
-                { icon: Bot, t: "IA de détection burn-out", d: "Signaux faibles par équipe, tendances longitudinales" },
-                { icon: ShieldCheck, t: "Whistleblowing chiffré", d: "AES-GCM côté client, jetons de suivi anonymes" },
-                { icon: ChartLine, t: "Rapports Loi 18-07", d: "Exports prêts à déposer, audit trail complet" },
+                { icon: LineChart, t: t("landingSuiteF1T"), d: t("landingSuiteF1D") },
+                { icon: Bot, t: t("landingSuiteF2T"), d: t("landingSuiteF2D") },
+                { icon: ShieldCheck, t: t("landingSuiteF3T"), d: t("landingSuiteF3D") },
+                { icon: ChartLine, t: t("landingSuiteF4T"), d: t("landingSuiteF4D") },
               ].map((f) => (
                 <li key={f.t} className="flex gap-4">
                   <div className="w-10 h-10 rounded-xl gradient-leaf grid place-items-center text-white shrink-0"><f.icon className="w-5 h-5" /></div>
@@ -238,7 +238,7 @@ function Landing() {
               <img src={productDashboard} alt="Tableau de bord WellWork" width={1280} height={900} loading="lazy" className="w-full h-auto object-cover" />
             </div>
             <div className="absolute -bottom-5 -right-4 glass rounded-2xl px-4 py-3 shadow-elegant text-xs font-medium flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-leaf animate-pulse" /> Signaux en temps réel
+              <span className="w-2 h-2 rounded-full bg-leaf animate-pulse" /> {t("landingSuiteRealtime")}
             </div>
           </div>
         </div>
@@ -251,20 +251,20 @@ function Landing() {
             <img src={storyWoman} alt="Portrait salariée" width={960} height={1024} loading="lazy" className="w-full h-[500px] object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-primary/60 via-transparent to-transparent" />
             <div className="absolute bottom-6 left-6 right-6">
-              <div className="text-xs uppercase tracking-widest opacity-80 mb-2">Réalité</div>
-              <div className="text-2xl font-display font-semibold leading-tight">Trop de salariés tombent malades à cause du travail. Il est temps d'agir.</div>
+              <div className="text-xs uppercase tracking-widest opacity-80 mb-2">{t("landingApprReality")}</div>
+              <div className="text-2xl font-display font-semibold leading-tight">{t("landingApprRealityT")}</div>
             </div>
           </div>
           <div>
-            <div className="text-xs uppercase tracking-widest text-leaf font-semibold mb-3">Notre approche</div>
-            <h2 className="text-3xl md:text-5xl font-bold font-display tracking-tight">Donnez à vos équipes les moyens de <em className="not-italic text-gradient-leaf">prévenir</em>, pas seulement de réagir.</h2>
-            <p className="mt-5 text-primary-foreground/80 max-w-lg">WellWork combine science du travail, IA responsable et anonymat cryptographique. Chaque salarié peut s'exprimer sans crainte. Chaque manager reçoit des insights actionnables. Chaque RH prouve la conformité.</p>
+            <div className="text-xs uppercase tracking-widest text-leaf font-semibold mb-3">{t("landingApprTag")}</div>
+            <h2 className="text-3xl md:text-5xl font-bold font-display tracking-tight">{t("landingApprTitle1")}<em className="not-italic text-gradient-leaf">{t("landingApprTitle2")}</em>{t("landingApprTitle3")}</h2>
+            <p className="mt-5 text-primary-foreground/80 max-w-lg">{t("landingApprDesc")}</p>
             <div className="mt-10 grid sm:grid-cols-2 gap-4">
               {[
-                { t: "Écoute continue", d: "Pulse court, anonyme, agrégé au seuil k ≥ 5" },
-                { t: "Action guidée", d: "Recommandations concrètes par équipe et par risque" },
-                { t: "Confiance mesurable", d: "Score de sécurité psychologique par département" },
-                { t: "Bien-être ancré", d: "Contenus, événements, coaching intégrés" },
+                { t: t("landingApprF1T"), d: t("landingApprF1D") },
+                { t: t("landingApprF2T"), d: t("landingApprF2D") },
+                { t: t("landingApprF3T"), d: t("landingApprF3D") },
+                { t: t("landingApprF4T"), d: t("landingApprF4D") },
               ].map((c) => (
                 <div key={c.t} className="rounded-2xl bg-white/5 border border-white/10 p-5 backdrop-blur">
                   <div className="font-semibold">{c.t}</div>
@@ -280,25 +280,25 @@ function Landing() {
       <section className="py-24 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="max-w-2xl mb-14">
-            <div className="text-xs uppercase tracking-widest text-leaf-deep font-semibold mb-3">Pont RH × HSE</div>
-            <h2 className="text-3xl md:text-5xl font-bold font-display tracking-tight">Reliez le bien-être des personnes aux indicateurs qui comptent.</h2>
+            <div className="text-xs uppercase tracking-widest text-leaf-deep font-semibold mb-3">{t("landingBridgeTag")}</div>
+            <h2 className="text-3xl md:text-5xl font-bold font-display tracking-tight">{t("landingBridgeTitle")}</h2>
           </div>
           <div className="grid md:grid-cols-3 gap-4">
             <div className="md:col-span-2 rounded-3xl bg-card border p-8 relative overflow-hidden">
-              <div className="text-sm text-muted-foreground mb-6">Corrélation absentéisme × bien-être — 12 derniers mois</div>
+              <div className="text-sm text-muted-foreground mb-6">{t("landingBridgeChartTitle")}</div>
               <FakeChart />
               <div className="mt-6 flex flex-wrap gap-4 text-xs">
-                <Legend color="var(--brand)" label="Bien-être" />
-                <Legend color="var(--leaf)" label="Absentéisme" />
+                <Legend color="var(--brand)" label={t("landingBridgeLegend1")} />
+                <Legend color="var(--leaf)" label={t("landingBridgeLegend2")} />
               </div>
             </div>
             <div className="grid grid-rows-2 gap-4">
               <div className="rounded-3xl gradient-leaf text-white p-8 flex flex-col justify-between">
-                <div className="text-sm/6 opacity-90">Réduction moyenne des arrêts maladie</div>
+                <div className="text-sm/6 opacity-90">{t("landingBridgeStat1T")}</div>
                 <div className="text-5xl font-bold font-display">6%</div>
               </div>
               <div className="rounded-3xl bg-primary text-primary-foreground p-8 flex flex-col justify-between">
-                <div className="text-sm/6 opacity-90">Croissance de la satisfaction interne</div>
+                <div className="text-sm/6 opacity-90">{t("landingBridgeStat2T")}</div>
                 <div className="text-5xl font-bold font-display">14%</div>
               </div>
             </div>
@@ -310,17 +310,17 @@ function Landing() {
       <section className="py-24 px-6 bg-muted/30 border-y border-border/50">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14 max-w-2xl mx-auto">
-            <h2 className="text-3xl md:text-5xl font-bold font-display tracking-tight">Pensé pour la confiance.</h2>
-            <p className="mt-4 text-muted-foreground">Chaque brique respecte l'anonymat, la conformité et la culture QVT algérienne.</p>
+            <h2 className="text-3xl md:text-5xl font-bold font-display tracking-tight">{t("landingGridTitle")}</h2>
+            <p className="mt-4 text-muted-foreground">{t("landingGridDesc")}</p>
           </div>
           <div className="grid md:grid-cols-3 gap-5">
             {[
-              { icon: ShieldCheck, title: "Espace anonyme sécurisé", desc: "Whistleblowing chiffré, jetons de suivi, aucune IP ni email stockés." },
-              { icon: Bot, title: "IA burn-out", desc: "Signaux faibles, tendances par équipe, recommandations RH concrètes." },
-              { icon: ChartLine, title: "Tableau de bord temps réel", desc: "KPIs QVT, radar RPS, benchmarks, rapports Loi 18-07 exportables." },
-              { icon: Users, title: "Multi-tenant natif", desc: "Un espace par organisation, RBAC complet, données strictement isolées." },
-              { icon: Zap, title: "Plans d'action", desc: "Du signal à l'action : responsables, échéances, progression, ROI QVT." },
-              { icon: Sparkles, title: "Bibliothèque bien-être", desc: "Contenus multilingues (FR/AR/EN), événements, messagerie, pulse hebdo." },
+              { icon: ShieldCheck, title: t("landingGridF1T"), desc: t("landingGridF1D") },
+              { icon: Bot, title: t("landingGridF2T"), desc: t("landingGridF2D") },
+              { icon: ChartLine, title: t("landingGridF3T"), desc: t("landingGridF3D") },
+              { icon: Users, title: t("landingGridF4T"), desc: t("landingGridF4D") },
+              { icon: Zap, title: t("landingGridF5T"), desc: t("landingGridF5D") },
+              { icon: Sparkles, title: t("landingGridF6T"), desc: t("landingGridF6D") },
             ].map((f, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.04 }}
                 className="p-6 rounded-3xl bg-card border hover:shadow-elegant hover:-translate-y-0.5 transition-all">
@@ -349,11 +349,11 @@ function Landing() {
             animate={{ opacity: 0.95, scale: 1, y: [0, -6, 0] }}
             transition={{ opacity: { duration: 0.6 }, scale: { duration: 0.6 }, y: { duration: 3, repeat: Infinity, ease: "easeInOut" } }}
           />
-          <h2 className="text-3xl md:text-5xl font-bold font-display tracking-tight">Vos équipes sont votre plus bel investissement.</h2>
-          <p className="mt-4 text-white/80 max-w-xl mx-auto">Faites en sorte qu'il porte ses fruits — avec WellWork.</p>
+          <h2 className="text-3xl md:text-5xl font-bold font-display tracking-tight">{t("landingCtaTitle")}</h2>
+          <p className="mt-4 text-white/80 max-w-xl mx-auto">{t("landingCtaDesc")}</p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Link to="/auth"><Button size="lg" className="bg-white text-primary hover:bg-white/90 h-12 px-6 rounded-full">Créer mon espace <ArrowRight className="w-4 h-4 ms-1" /></Button></Link>
-            <Link to="/auth"><Button size="lg" variant="outline" className="h-12 px-6 rounded-full border-white/30 bg-transparent text-white hover:bg-white/10">Parler à l'équipe</Button></Link>
+            <Link to="/auth"><Button size="lg" className="bg-white text-primary hover:bg-white/90 h-12 px-6 rounded-full">{t("landingPricingCreate")} <ArrowRight className="w-4 h-4 ms-1" /></Button></Link>
+            <Link to="/auth"><Button size="lg" variant="outline" className="h-12 px-6 rounded-full border-white/30 bg-transparent text-white hover:bg-white/10">{t("landingCtaTalk")}</Button></Link>
           </div>
         </div>
       </section>
@@ -363,7 +363,7 @@ function Landing() {
         <div className="max-w-7xl mx-auto grid md:grid-cols-[1.4fr_1fr_1fr_1fr] gap-10">
           <div>
             <img src={wordmark} alt="WellWork" className="h-9 w-auto object-contain" />
-            <p className="mt-4 text-sm text-sidebar-foreground/70 max-w-xs">Le bien-être au cœur de la performance. Plateforme QVT & prévention des RPS conforme Loi 18-07.</p>
+            <p className="mt-4 text-sm text-sidebar-foreground/70 max-w-xs">{t("landingFooterDesc")}</p>
           </div>
           {[
             { title: "Plateforme", links: ["Pulse", "Feedback anonyme", "IA burn-out", "Rapports"] },
@@ -379,8 +379,8 @@ function Landing() {
           ))}
         </div>
         <div className="max-w-7xl mx-auto mt-12 pt-6 border-t border-white/10 text-xs text-sidebar-foreground/50 flex flex-wrap justify-between gap-3">
-          <div>© {new Date().getFullYear()} WellWork · Tous droits réservés</div>
-          <div>Conforme Loi 18-07 · Anonymat cryptographique strict · Hébergé en Algérie</div>
+          <div>© {new Date().getFullYear()} WellWork · {t("landingFooterRights")}</div>
+          <div>{t("landingFooterLegal")}</div>
         </div>
       </footer>
     </div>
@@ -407,9 +407,9 @@ function PricingSection() {
     <section id="pricing" className="py-24 px-6 bg-muted/30">
       <div className="max-w-7xl mx-auto">
         <div className="text-center max-w-2xl mx-auto mb-14">
-          <Badge variant="secondary" className="mb-4">Tarifs</Badge>
-          <h2 className="text-3xl md:text-5xl font-bold font-display tracking-tight">Un plan pour chaque étape de votre croissance.</h2>
-          <p className="mt-4 text-muted-foreground">Commencez gratuitement, évoluez sans friction.</p>
+          <Badge variant="secondary" className="mb-4">{t("landingPricingTag")}</Badge>
+          <h2 className="text-3xl md:text-5xl font-bold font-display tracking-tight">{t("landingPricingTitle")}</h2>
+          <p className="mt-4 text-muted-foreground">{t("landingPricingDesc")}</p>
         </div>
         
         {loading ? (
@@ -420,12 +420,12 @@ function PricingSection() {
               <motion.div key={plan.id} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.06 }}>
                 <div className={`h-full p-6 rounded-3xl border bg-card flex flex-col relative ${plan.highlighted ? "border-brand shadow-glow ring-1 ring-brand/30" : ""}`}>
                   {plan.highlighted && (
-                    <span className="absolute -top-3 start-6 text-[11px] font-semibold px-3 py-1 rounded-full gradient-brand text-white">Le plus populaire</span>
+                    <span className="absolute -top-3 start-6 text-[11px] font-semibold px-3 py-1 rounded-full gradient-brand text-white">{t("landingPricingPop")}</span>
                   )}
                   <div className="font-display font-semibold text-lg">{plan.name}</div>
                   <p className="text-sm text-muted-foreground mt-1">{plan.tagline}</p>
                   <div className="mt-5 text-2xl font-bold">
-                    {plan.price_monthly === null ? "Sur devis" : plan.price_monthly === 0 ? "Gratuit" : `${plan.price_monthly} ${plan.currency}/mois`}
+                    {plan.price_monthly === null ? t("landingPricingQuote") : plan.price_monthly === 0 ? t("landingPricingFree") : `${plan.price_monthly} ${plan.currency}/${t("landingPricingMonth")}`}
                   </div>
                   <ul className="mt-5 space-y-2.5 text-sm flex-1">
                     {(plan.features || []).map((f: string, idx: number) => (
@@ -437,7 +437,7 @@ function PricingSection() {
                   <div className="mt-6">
                     <Link to="/auth">
                       <Button className={`w-full rounded-full ${plan.highlighted ? "gradient-brand text-white border-0" : ""}`} variant={plan.highlighted ? "default" : "outline"}>
-                        {plan.price_monthly === null ? "Nous contacter" : "Créer mon espace"}
+                        {plan.price_monthly === null ? t("landingPricingContact") : t("landingPricingCreate")}
                       </Button>
                     </Link>
                   </div>
