@@ -6,6 +6,7 @@ import { Sidebar } from "./Sidebar";
 import { useI18n } from "@/hooks/useI18n";
 import { useThemeSync } from "@/hooks/useTheme";
 import { Toaster } from "@/components/ui/sonner";
+import { useStore } from "@/store/useStore";
 
 export function AppShell({ children }: { children: ReactNode }) {
   useI18n(); // sync direction

@@ -4,7 +4,7 @@ import { Loader2, Sparkles, LayoutDashboard, LogOut, User, Image, Home, Settings
 import { useAuth, useMySpace, hasRole } from "@/hooks/useAuth";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { useI18n } from "@/hooks/useI18n";
 import { useStore } from "@/store/useStore";
 import { LANGS } from "@/lib/i18n";
