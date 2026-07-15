@@ -388,6 +388,7 @@ function Landing() {
 }
 
 function PricingSection() {
+  const { t } = useI18n();
   const [plans, setPlans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
