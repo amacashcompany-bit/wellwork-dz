@@ -12,6 +12,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { sendAccessTokenEmail } from "@/lib/mailer";
 
 export const Route = createFileRoute("/superadmin/")({
   head: () => ({ meta: [{ title: "Super Admin Dashboard — Wellwork" }] }),
@@ -125,14 +126,27 @@ function SuperAdminDashboard() {
       })
       .eq("id", selectedDemo.id);
       
-    setIsApproving(false);
-    
     if (error) {
+      setIsApproving(false);
       toast.error(error.message);
       return;
     }
+
+    try {
+      await sendAccessTokenEmail({ 
+        data: { 
+          email: selectedDemo.email, 
+          companyName: selectedDemo.company_name, 
+          token 
+        } 
+      });
+      toast.success("Jeton généré et email envoyé avec succès !");
+    } catch (err) {
+      console.error(err);
+      toast.warning("Jeton généré, mais l'envoi de l'email a échoué. Vérifiez vos identifiants Gmail.");
+    }
     
-    toast.success("Demande approuvée avec succès ! Jeton généré.");
+    setIsApproving(false);
     setSelectedDemo(null);
     loadData();
   };

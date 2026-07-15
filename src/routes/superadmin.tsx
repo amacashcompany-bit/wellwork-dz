@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Loader2, Sparkles, LayoutDashboard, LogOut, User, Image, Home } from "lucide-react";
+import { Loader2, Sparkles, LayoutDashboard, LogOut, User, Image, Home, Settings } from "lucide-react";
 import { useAuth, useMySpace, hasRole } from "@/hooks/useAuth";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
@@ -105,18 +105,33 @@ function SuperAdminLayout() {
         <nav className="flex-1 px-4 space-y-1">
           <Link
             to="/superadmin"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium bg-brand/10 text-brand"
+            activeOptions={{ exact: true }}
+            activeProps={{ className: "bg-brand/10 text-brand" }}
+            inactiveProps={{ className: "text-muted-foreground hover:bg-muted/50 hover:text-foreground" }}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors"
           >
             <LayoutDashboard className="w-4 h-4" />
             Tableau de bord
           </Link>
           <Link
-            to="/"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
+            to="/superadmin/plans"
+            activeProps={{ className: "bg-brand/10 text-brand" }}
+            inactiveProps={{ className: "text-muted-foreground hover:bg-muted/50 hover:text-foreground" }}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors"
           >
-            <Home className="w-4 h-4" />
-            Page d'accueil
+            <Settings className="w-4 h-4" />
+            Abonnements & Plans
           </Link>
+
+          <div className="pt-6">
+            <Link
+              to="/"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors"
+            >
+              <Home className="w-4 h-4" />
+              Page d'accueil
+            </Link>
+          </div>
         </nav>
 
         {/* User profile section at the bottom */}

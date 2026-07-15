@@ -1,9 +1,9 @@
 import type { Lang } from "@/types";
 
 export const LANGS: { code: Lang; label: string; flag: string; dir: "rtl" | "ltr" }[] = [
-  { code: "fr", label: "Français", flag: "🇫🇷", dir: "ltr" },
-  { code: "ar", label: "العربية", flag: "🇩🇿", dir: "rtl" },
-  { code: "en", label: "English", flag: "🇬🇧", dir: "ltr" },
+  { code: "fr", label: "Français", flag: "https://flagcdn.com/w20/fr.png", dir: "ltr" },
+  { code: "ar", label: "العربية", flag: "https://flagcdn.com/w20/dz.png", dir: "rtl" },
+  { code: "en", label: "English", flag: "https://flagcdn.com/w20/gb.png", dir: "ltr" },
 ];
 
 export const dict = {
@@ -13,6 +13,20 @@ export const dict = {
     ar: "جودة الحياة في العمل والوقاية من المخاطر النفسية",
     en: "Quality of Work Life & Psychosocial Risk Prevention",
   },
+  // Landing Page translations
+  landingNavPlatform: { fr: "Plateforme", ar: "المنصة", en: "Platform" },
+  landingNavApproach: { fr: "Approche", ar: "النهج", en: "Approach" },
+  landingNavInsights: { fr: "Insights", ar: "رؤى", en: "Insights" },
+  landingNavPricing: { fr: "Tarifs", ar: "الأسعار", en: "Pricing" },
+  landingLogin: { fr: "Connexion", ar: "تسجيل الدخول", en: "Login" },
+  landingDemoBtn: { fr: "Demander une démo", ar: "طلب عرض تجريبي", en: "Request Demo" },
+  landingHeroBadge: { fr: "Prévention QVT · Conformité Loi 18-07", ar: "الوقاية · مطابقة القانون 18-07", en: "QWL Prevention · Law 18-07 Compliant" },
+  landingHeroTitle1: { fr: "Prévenez les risques ", ar: "امنع المخاطر ", en: "Prevent risks " },
+  landingHeroTitle2: { fr: "avant", ar: "قبل", en: "before" },
+  landingHeroTitle3: { fr: " qu'ils ne touchent votre entreprise.", ar: " أن تصل إلى شركتك.", en: " they impact your company." },
+  landingHeroDesc: { fr: "WellWork réunit RH, managers et salariés autour d'une même plateforme : mesurer le bien-être en continu, agir sur les signaux faibles, et faire du bien-être un levier de performance durable.", ar: "تجمع منصة WellWork بين الموارد البشرية والمديرين والموظفين: قياس مستمر لجودة الحياة، والتصرف حيال الإشارات الضعيفة، وجعل الرفاهية محركًا للأداء المستدام.", en: "WellWork brings HR, managers, and employees together: continuous measurement, acting on weak signals, and making well-being a driver of sustainable performance." },
+  landingHeroStartBtn: { fr: "Démarrer gratuitement", ar: "ابدأ مجاناً", en: "Start for free" },
+  landingHeroDiscoverBtn: { fr: "Découvrir la plateforme", ar: "اكتشف المنصة", en: "Discover the platform" },
   hrPortal: { fr: "Espace RH", ar: "إدارة الموارد البشرية", en: "HR Portal" },
   employeePortal: { fr: "Espace Employé", ar: "فضاء الموظف", en: "Employee Space" },
   complianceBadge: { fr: "Conforme Loi 18-07", ar: "متوافق مع القانون 18-07", en: "Law 18-07 Compliant" },

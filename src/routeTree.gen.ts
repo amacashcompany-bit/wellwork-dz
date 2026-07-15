@@ -18,6 +18,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as SuperadminIndexRouteImport } from './routes/superadmin.index'
 import { Route as EmployeeIndexRouteImport } from './routes/employee.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as SuperadminPlansRouteImport } from './routes/superadmin.plans'
 import { Route as EmployeeSurveysRouteImport } from './routes/employee.surveys'
 import { Route as EmployeeMessagesRouteImport } from './routes/employee.messages'
 import { Route as EmployeeLibraryRouteImport } from './routes/employee.library'
@@ -84,6 +85,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRoute,
+} as any)
+const SuperadminPlansRoute = SuperadminPlansRouteImport.update({
+  id: '/plans',
+  path: '/plans',
+  getParentRoute: () => SuperadminRoute,
 } as any)
 const EmployeeSurveysRoute = EmployeeSurveysRouteImport.update({
   id: '/surveys',
@@ -219,6 +225,7 @@ export interface FileRoutesByFullPath {
   '/employee/library': typeof EmployeeLibraryRoute
   '/employee/messages': typeof EmployeeMessagesRoute
   '/employee/surveys': typeof EmployeeSurveysRoute
+  '/superadmin/plans': typeof SuperadminPlansRoute
   '/admin/': typeof AdminIndexRoute
   '/employee/': typeof EmployeeIndexRoute
   '/superadmin/': typeof SuperadminIndexRoute
@@ -248,6 +255,7 @@ export interface FileRoutesByTo {
   '/employee/library': typeof EmployeeLibraryRoute
   '/employee/messages': typeof EmployeeMessagesRoute
   '/employee/surveys': typeof EmployeeSurveysRoute
+  '/superadmin/plans': typeof SuperadminPlansRoute
   '/admin': typeof AdminIndexRoute
   '/employee': typeof EmployeeIndexRoute
   '/superadmin': typeof SuperadminIndexRoute
@@ -281,6 +289,7 @@ export interface FileRoutesById {
   '/employee/library': typeof EmployeeLibraryRoute
   '/employee/messages': typeof EmployeeMessagesRoute
   '/employee/surveys': typeof EmployeeSurveysRoute
+  '/superadmin/plans': typeof SuperadminPlansRoute
   '/admin/': typeof AdminIndexRoute
   '/employee/': typeof EmployeeIndexRoute
   '/superadmin/': typeof SuperadminIndexRoute
@@ -315,6 +324,7 @@ export interface FileRouteTypes {
     | '/employee/library'
     | '/employee/messages'
     | '/employee/surveys'
+    | '/superadmin/plans'
     | '/admin/'
     | '/employee/'
     | '/superadmin/'
@@ -344,6 +354,7 @@ export interface FileRouteTypes {
     | '/employee/library'
     | '/employee/messages'
     | '/employee/surveys'
+    | '/superadmin/plans'
     | '/admin'
     | '/employee'
     | '/superadmin'
@@ -376,6 +387,7 @@ export interface FileRouteTypes {
     | '/employee/library'
     | '/employee/messages'
     | '/employee/surveys'
+    | '/superadmin/plans'
     | '/admin/'
     | '/employee/'
     | '/superadmin/'
@@ -454,6 +466,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/superadmin/plans': {
+      id: '/superadmin/plans'
+      path: '/plans'
+      fullPath: '/superadmin/plans'
+      preLoaderRoute: typeof SuperadminPlansRouteImport
+      parentRoute: typeof SuperadminRoute
     }
     '/employee/surveys': {
       id: '/employee/surveys'
@@ -670,10 +689,12 @@ const EmployeeRouteWithChildren = EmployeeRoute._addFileChildren(
 )
 
 interface SuperadminRouteChildren {
+  SuperadminPlansRoute: typeof SuperadminPlansRoute
   SuperadminIndexRoute: typeof SuperadminIndexRoute
 }
 
 const SuperadminRouteChildren: SuperadminRouteChildren = {
+  SuperadminPlansRoute: SuperadminPlansRoute,
   SuperadminIndexRoute: SuperadminIndexRoute,
 }
 

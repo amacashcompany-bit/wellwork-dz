@@ -3,11 +3,15 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   ArrowRight, ArrowUpRight, ShieldCheck, Sparkles, Users, Bot, ChartLine, Zap,
-  HeartPulse, LineChart, Leaf, Check,
+  HeartPulse, LineChart, Leaf, Check, Moon, Sun, Loader2
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useI18n } from "@/hooks/useI18n";
+import { useStore } from "@/store/useStore";
+import { LANGS } from "@/lib/i18n";
 import logoMark from "@/assets/brand/wellwork-logo-mark.png";
 import wordmark from "@/assets/brand/wellwork-wordmark.png";
 import heroTeam from "@/assets/hero-team.jpg";
@@ -29,6 +33,10 @@ export const Route = createFileRoute("/")({
 
 function Landing() {
   const [user, setUser] = useState<any>(null);
+  const { t, language, setLanguage } = useI18n();
+  const isDark = useStore((s) => s.isDarkMode);
+  const toggleDark = useStore((s) => s.toggleDarkMode);
+  const currentLang = LANGS.find((l) => l.code === language) || LANGS[0];
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -54,12 +62,32 @@ function Landing() {
             <span className="font-display font-bold text-lg tracking-tight">WellWork</span>
           </Link>
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
-            <a href="#platform" className="hover:text-foreground transition">Plateforme</a>
-            <a href="#approach" className="hover:text-foreground transition">Approche</a>
-            <a href="#insights" className="hover:text-foreground transition">Insights</a>
-            <a href="#pricing" className="hover:text-foreground transition">Tarifs</a>
+            <a href="#platform" className="hover:text-foreground transition">{t("landingNavPlatform")}</a>
+            <a href="#approach" className="hover:text-foreground transition">{t("landingNavApproach")}</a>
+            <a href="#insights" className="hover:text-foreground transition">{t("landingNavInsights")}</a>
+            <a href="#pricing" className="hover:text-foreground transition">{t("landingNavPricing")}</a>
           </nav>
           <div className="flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="gap-1.5 px-2 text-muted-foreground hover:text-foreground">
+                  <img src={currentLang.flag} alt={currentLang.code} className="w-4 h-3 object-cover rounded-sm shadow-sm" />
+                  <span className="hidden sm:inline uppercase text-xs font-semibold">{currentLang.code}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {LANGS.map((l) => (
+                  <DropdownMenuItem key={l.code} onClick={() => setLanguage(l.code)}>
+                    <img src={l.flag} alt={l.code} className="me-2 w-4 h-3 object-cover rounded-sm shadow-sm" /> {l.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <Button variant="ghost" size="icon" onClick={toggleDark} aria-label="Toggle theme" className="text-muted-foreground hover:text-foreground">
+              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </Button>
+
             {user ? (
               <Link to="/onboarding">
                 <Button className="gradient-brand text-white border-0 h-10 rounded-full px-5 shadow-elegant">
@@ -68,10 +96,10 @@ function Landing() {
               </Link>
             ) : (
               <>
-                <Link to="/auth" className="text-sm font-medium hover:text-brand transition-colors hidden sm:inline-flex px-3">Connexion</Link>
+                <Link to="/auth" className="text-sm font-medium hover:text-brand transition-colors hidden sm:inline-flex px-3">{t("landingLogin")}</Link>
                 <Link to="/auth">
                   <Button className="gradient-leaf text-white border-0 h-10 rounded-full px-5 shadow-elegant">
-                    Demander une démo <ArrowUpRight className="w-4 h-4 ms-1" />
+                    {t("landingDemoBtn")} <ArrowUpRight className="w-4 h-4 ms-1" />
                   </Button>
                 </Link>
               </>
@@ -86,26 +114,26 @@ function Landing() {
           <div>
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
               className="inline-flex items-center gap-2 rounded-full bg-leaf/10 border border-leaf/25 px-4 py-1.5 text-xs font-medium text-leaf-deep mb-6">
-              <Leaf className="w-3.5 h-3.5" /> Prévention QVT · Conformité Loi 18-07
+              <Leaf className="w-3.5 h-3.5" /> {t("landingHeroBadge")}
             </motion.div>
             <motion.h1 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
               className="text-[2.5rem] md:text-6xl lg:text-[4.2rem] font-bold tracking-tight leading-[1.02] font-display">
-              Prévenez les risques <span className="text-gradient-leaf">avant</span> qu'ils ne touchent votre entreprise.
+              {t("landingHeroTitle1")}<span className="text-gradient-leaf">{t("landingHeroTitle2")}</span>{t("landingHeroTitle3")}
             </motion.h1>
             <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
               className="mt-6 text-lg text-muted-foreground max-w-xl leading-relaxed">
-              WellWork réunit RH, managers et salariés autour d'une même plateforme : mesurer le bien-être en continu, agir sur les signaux faibles, et faire du bien-être un levier de performance durable.
+              {t("landingHeroDesc")}
             </motion.p>
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
               className="mt-8 flex flex-wrap items-center gap-3">
               <Link to="/auth">
                 <Button size="lg" className="gradient-leaf text-white border-0 h-12 px-6 rounded-full shadow-elegant">
-                  Démarrer gratuitement <ArrowRight className="w-4 h-4 ms-1" />
+                  {t("landingHeroStartBtn")} <ArrowRight className="w-4 h-4 ms-1" />
                 </Button>
               </Link>
               <a href="#platform">
                 <Button size="lg" variant="outline" className="h-12 px-6 rounded-full border-foreground/15">
-                  Découvrir la plateforme
+                  {t("landingHeroDiscoverBtn")}
                 </Button>
               </a>
             </motion.div>
@@ -360,11 +388,20 @@ function Landing() {
 }
 
 function PricingSection() {
-  const plans = [
-    { name: "Starter", tagline: "Pour découvrir la plateforme", price: "Gratuit", features: ["Jusqu'à 25 employés", "1 enquête active", "Support communautaire"], highlighted: false, cta: "Créer mon espace" },
-    { name: "Business", tagline: "Pour les PME en croissance", price: "Sur devis", features: ["Employés illimités", "Managers & permissions", "Enquêtes anonymes k≥5", "IA burn-out", "Support prioritaire"], highlighted: true, cta: "Créer mon espace" },
-    { name: "Enterprise", tagline: "Grands comptes & multi-sites", price: "Sur devis", features: ["Multi-espaces", "SSO SAML", "Intégrations ERP", "Success manager dédié"], highlighted: false, cta: "Nous contacter" },
-  ];
+  const [plans, setPlans] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    supabase
+      .from("plans")
+      .select("*")
+      .eq("active", true)
+      .order("sort_order", { ascending: true })
+      .then(({ data }) => {
+        setPlans(data || []);
+        setLoading(false);
+      });
+  }, []);
 
   return (
     <section id="pricing" className="py-24 px-6 bg-muted/30">
@@ -374,34 +411,41 @@ function PricingSection() {
           <h2 className="text-3xl md:text-5xl font-bold font-display tracking-tight">Un plan pour chaque étape de votre croissance.</h2>
           <p className="mt-4 text-muted-foreground">Commencez gratuitement, évoluez sans friction.</p>
         </div>
-        <div className="grid md:grid-cols-3 gap-5">
-          {plans.map((plan, i) => (
-            <motion.div key={plan.name} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.06 }}>
-              <div className={`h-full p-6 rounded-3xl border bg-card flex flex-col relative ${plan.highlighted ? "border-brand shadow-glow ring-1 ring-brand/30" : ""}`}>
-                {plan.highlighted && (
-                  <span className="absolute -top-3 start-6 text-[11px] font-semibold px-3 py-1 rounded-full gradient-brand text-white">Le plus populaire</span>
-                )}
-                <div className="font-display font-semibold text-lg">{plan.name}</div>
-                <p className="text-sm text-muted-foreground mt-1">{plan.tagline}</p>
-                <div className="mt-5 text-2xl font-bold">{plan.price}</div>
-                <ul className="mt-5 space-y-2.5 text-sm flex-1">
-                  {plan.features.map((f, idx) => (
-                    <li key={idx} className="flex items-start gap-2">
-                      <Check className="w-4 h-4 text-leaf mt-0.5 shrink-0" /> <span className="text-muted-foreground">{f}</span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-6">
-                  <Link to="/auth">
-                    <Button className={`w-full rounded-full ${plan.highlighted ? "gradient-brand text-white border-0" : ""}`} variant={plan.highlighted ? "default" : "outline"}>
-                      {plan.cta}
-                    </Button>
-                  </Link>
+        
+        {loading ? (
+          <div className="flex justify-center p-12"><Loader2 className="w-8 h-8 animate-spin text-brand/50" /></div>
+        ) : (
+          <div className="grid md:grid-cols-3 gap-5">
+            {plans.map((plan, i) => (
+              <motion.div key={plan.id} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.06 }}>
+                <div className={`h-full p-6 rounded-3xl border bg-card flex flex-col relative ${plan.highlighted ? "border-brand shadow-glow ring-1 ring-brand/30" : ""}`}>
+                  {plan.highlighted && (
+                    <span className="absolute -top-3 start-6 text-[11px] font-semibold px-3 py-1 rounded-full gradient-brand text-white">Le plus populaire</span>
+                  )}
+                  <div className="font-display font-semibold text-lg">{plan.name}</div>
+                  <p className="text-sm text-muted-foreground mt-1">{plan.tagline}</p>
+                  <div className="mt-5 text-2xl font-bold">
+                    {plan.price_monthly === null ? "Sur devis" : plan.price_monthly === 0 ? "Gratuit" : `${plan.price_monthly} ${plan.currency}/mois`}
+                  </div>
+                  <ul className="mt-5 space-y-2.5 text-sm flex-1">
+                    {(plan.features || []).map((f: string, idx: number) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <Check className="w-4 h-4 text-leaf mt-0.5 shrink-0" /> <span className="text-muted-foreground">{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="mt-6">
+                    <Link to="/auth">
+                      <Button className={`w-full rounded-full ${plan.highlighted ? "gradient-brand text-white border-0" : ""}`} variant={plan.highlighted ? "default" : "outline"}>
+                        {plan.price_monthly === null ? "Nous contacter" : "Créer mon espace"}
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

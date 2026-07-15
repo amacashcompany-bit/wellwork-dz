@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Bell, Building2, LogOut, Moon, ShieldCheck, Sun, User } from "lucide-react";
+import { Bell, Building2, LogOut, Moon, ShieldCheck, Sun, User, AlertCircle, Loader2 } from "lucide-react";
 import logoMark from "@/assets/brand/wellwork-logo-mark.png";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,10 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/hooks/useI18n";
 import { useStore } from "@/store/useStore";
 import { useAuth, useMySpace, hasRole } from "@/hooks/useAuth";
@@ -28,6 +33,30 @@ export function TopNav() {
   const handleRoleChange = (r: "admin" | "employee") => {
     setRole(r);
     navigate({ to: r === "admin" ? "/admin/dashboard" : "/employee/home", replace: true });
+  };
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText !== "delete account") return;
+    setIsDeleting(true);
+    const { error } = await supabase.rpc("delete_my_account");
+    setIsDeleting(false);
+    
+    if (error) {
+      if (error.message.includes("violates foreign key constraint")) {
+        toast.error("Impossible de supprimer : vous êtes propriétaire d'un espace. Veuillez supprimer ou transférer l'espace d'abord.");
+      } else {
+        toast.error(error.message);
+      }
+      return;
+    }
+    
+    toast.success("Votre compte a été supprimé avec succès.");
+    setShowDeleteModal(false);
+    signOut();
   };
 
   return (
@@ -64,14 +93,14 @@ export function TopNav() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm" className="gap-1.5">
-            <span>{currentLang.flag}</span>
+            <img src={currentLang.flag} alt={currentLang.code} className="w-4 h-3 object-cover rounded-sm shadow-sm" />
             <span className="hidden sm:inline">{currentLang.label}</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           {LANGS.map((l) => (
             <DropdownMenuItem key={l.code} onClick={() => setLanguage(l.code)}>
-              <span className="me-2">{l.flag}</span> {l.label}
+              <img src={l.flag} alt={l.code} className="me-2 w-4 h-3 object-cover rounded-sm shadow-sm" /> {l.label}
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>
@@ -107,11 +136,51 @@ export function TopNav() {
             <DropdownMenuItem asChild className="text-brand font-medium"><Link to="/superadmin">Master Admin</Link></DropdownMenuItem>
           )}
           <DropdownMenuSeparator />
-          <DropdownMenuItem className="text-danger" onClick={signOut}>
+          <DropdownMenuItem className="text-danger cursor-pointer" onSelect={(e) => { e.preventDefault(); setShowDeleteModal(true); }}>
+            Supprimer le compte
+          </DropdownMenuItem>
+          <DropdownMenuItem className="cursor-pointer" onClick={signOut}>
             <LogOut className="w-3.5 h-3.5 me-2" /> {t("logout")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+        <DialogContent className="glass-dark border-brand/20 text-white sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-danger">
+              <AlertCircle className="w-5 h-5" />
+              Supprimer le compte
+            </DialogTitle>
+            <DialogDescription className="text-white/70 pt-3">
+              Cette action est <strong className="text-white">définitive</strong>. Toutes vos données seront effacées et vous ne pourrez plus accéder à votre compte. 
+              <br /><br />
+              Veuillez écrire <strong>delete account</strong> ci-dessous pour confirmer.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Input 
+              value={deleteConfirmText} 
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              placeholder="delete account" 
+              className="bg-white/5 border-white/10 text-white"
+            />
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setShowDeleteModal(false)} className="bg-transparent border-white/20 text-white hover:bg-white/10">
+              Annuler
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleDeleteAccount} 
+              disabled={deleteConfirmText !== "delete account" || isDeleting}
+              className="bg-danger hover:bg-danger/90 text-white"
+            >
+              {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Confirmer la suppression"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </header>
   );
 }

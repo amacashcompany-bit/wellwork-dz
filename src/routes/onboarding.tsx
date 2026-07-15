@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
-import { Building2, KeyRound, Loader2, Plus, Sparkles, Send } from "lucide-react";
+import { Building2, KeyRound, Loader2, Plus, Sparkles, Send, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, useMySpace } from "@/hooks/useAuth";
 import { Card } from "@/components/ui/card";
@@ -20,7 +20,7 @@ function OnboardingPage() {
   const navigate = useNavigate();
   const { user, loading: authLoading, signOut } = useAuth();
   const { info, loading: spaceLoading, refetch } = useMySpace();
-  const [mode, setMode] = useState<"choose" | "request_demo" | "join_token" | "join_employee">("choose");
+  const [mode, setMode] = useState<"choose" | "request_demo" | "join_token" | "join_employee" | "demo_success">("choose");
   
   // State for request demo
   const [companyName, setCompanyName] = useState("");
@@ -67,8 +67,8 @@ function OnboardingPage() {
     });
     setBusy(false);
     if (error) return toast.error(error.message);
-    toast.success("Demande envoyée ! Nous vous contacterons sous peu.");
-    setMode("choose");
+    toast.success("Demande envoyée !");
+    setMode("demo_success");
   };
 
   const createTrialSpace = async () => {
@@ -174,6 +174,26 @@ function OnboardingPage() {
                   {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : "Envoyer la demande"}
                 </Button>
               </div>
+            </div>
+          </Card>
+        )}
+
+        {mode === "demo_success" && (
+          <Card className="p-10 rounded-3xl glass-dark border-brand/30 text-center text-white relative overflow-hidden shadow-elegant">
+            <div className="absolute inset-0 bg-brand/5 backdrop-blur-3xl" />
+            <div className="relative z-10 flex flex-col items-center">
+              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", damping: 12, delay: 0.1 }} className="w-16 h-16 rounded-full gradient-brand flex items-center justify-center shadow-[0_0_40px_rgba(16,185,129,0.4)] mb-6">
+                <CheckCircle2 className="w-8 h-8 text-white" />
+              </motion.div>
+              <motion.h1 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-2xl md:text-3xl font-bold font-display mb-3">Demande envoyée avec succès !</motion.h1>
+              <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="text-white/70 max-w-sm mx-auto mb-8 leading-relaxed text-sm">
+                Merci de l'intérêt que vous portez à WellWork. Notre équipe examinera votre demande et vous enverra un jeton d'accès sécurisé par email très rapidement.
+              </motion.p>
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
+                <Button onClick={() => setMode("choose")} variant="outline" className="bg-transparent border-white/20 text-white hover:bg-white/10 rounded-full px-8">
+                  Retour à l'accueil
+                </Button>
+              </motion.div>
             </div>
           </Card>
         )}
