@@ -2,7 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Bell, Building2, LogOut, Moon, ShieldCheck, Sun, User, AlertCircle, Loader2, Menu, PanelLeftClose, PanelLeftOpen } from "lucide-react";
-import logoMark from "@/assets/brand/wellwork-logo-mark.png";
+import logoMark from "@/assets/brand/wellwork-logo-mark.jpg";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {

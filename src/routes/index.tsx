@@ -12,7 +12,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useI18n } from "@/hooks/useI18n";
 import { useStore } from "@/store/useStore";
 import { LANGS } from "@/lib/i18n";
-import logoMark from "@/assets/brand/wellwork-logo-mark.png";
+import logoMark from "@/assets/brand/wellwork-logo-mark.jpg";
 import wordmark from "@/assets/brand/wellwork-wordmark.png";
 import heroTeam from "@/assets/hero-team.jpg";
 import storyWoman from "@/assets/story-woman.jpg";

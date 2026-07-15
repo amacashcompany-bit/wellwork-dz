@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import logoMark from "@/assets/brand/wellwork-logo-mark.png";
+import logoMark from "@/assets/brand/wellwork-logo-mark.jpg";
 
 export function SplashScreen() {
   const [show, setShow] = useState(true);
