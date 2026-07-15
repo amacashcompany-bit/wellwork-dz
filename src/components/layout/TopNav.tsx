@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Bell, Building2, LogOut, Moon, ShieldCheck, Sun, User, AlertCircle, Loader2 } from "lucide-react";
+import { Bell, Building2, LogOut, Moon, ShieldCheck, Sun, User, AlertCircle, Loader2, Menu, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import logoMark from "@/assets/brand/wellwork-logo-mark.png";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -59,8 +59,15 @@ export function TopNav() {
     signOut();
   };
 
+  const isSidebarCollapsed = useStore((s) => s.isSidebarCollapsed);
+  const toggleSidebar = useStore((s) => s.toggleSidebar);
+
   return (
     <header className="fixed top-0 inset-x-0 z-50 h-16 glass border-b flex items-center px-4 md:px-6 gap-3">
+      <Button variant="ghost" size="icon" onClick={toggleSidebar} className="hidden md:flex shrink-0 w-9 h-9 text-muted-foreground hover:text-foreground">
+        {isSidebarCollapsed ? <PanelLeftOpen className="w-5 h-5" /> : <PanelLeftClose className="w-5 h-5" />}
+      </Button>
+
       <Link to={role === "admin" ? "/admin/dashboard" : "/employee/home"} className="flex items-center gap-2 shrink-0">
         <motion.img
           src={logoMark}

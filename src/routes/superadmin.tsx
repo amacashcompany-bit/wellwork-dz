@@ -100,18 +100,19 @@ function SuperAdminLayout() {
     <div className="min-h-screen bg-background flex flex-col md:flex-row">
       {/* Sidebar for Super Admin */}
       <aside className={`w-full ${isSidebarCollapsed ? "md:w-20" : "md:w-64"} border-b md:border-b-0 md:border-r border-border/40 bg-card flex flex-col transition-all duration-300 ease-in-out`}>
-        <div className="p-6">
-          <Link to="/" className={`flex items-center ${isSidebarCollapsed ? "justify-center" : "gap-2"}`}>
+        <div className="p-4 md:p-6 flex items-center justify-between">
+          <Link to="/" className={`flex items-center ${isSidebarCollapsed ? "justify-center hidden" : "gap-2"}`}>
             <div className="w-8 h-8 rounded-lg gradient-brand flex items-center justify-center shadow-glow shrink-0">
               <Sparkles className="w-4 h-4 text-white" />
             </div>
-            {!isSidebarCollapsed && (
-              <div className="overflow-hidden">
-                <div className="font-display font-bold leading-tight truncate">Wellwork</div>
-                <div className="text-[9px] uppercase tracking-widest text-brand font-semibold truncate">{t("saMasterAdmin")}</div>
-              </div>
-            )}
+            <div className="overflow-hidden">
+              <div className="font-display font-bold leading-tight truncate">Wellwork</div>
+              <div className="text-[9px] uppercase tracking-widest text-brand font-semibold truncate">{t("saMasterAdmin")}</div>
+            </div>
           </Link>
+          <Button variant="ghost" size="icon" onClick={toggleSidebar} className={`hidden md:flex shrink-0 w-8 h-8 text-muted-foreground hover:text-foreground ${isSidebarCollapsed ? "mx-auto" : ""}`}>
+            {isSidebarCollapsed ? <PanelLeftOpen className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
+          </Button>
         </div>
         
         <nav className="flex-1 px-4 space-y-1">
@@ -172,12 +173,6 @@ function SuperAdminLayout() {
           <Button variant="outline" size="icon" className="h-9 w-9 shrink-0 mx-auto" onClick={toggleDark}>
             {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </Button>
-
-          {isSidebarCollapsed && (
-            <Button variant="outline" size="icon" className="h-9 w-9 shrink-0 mx-auto" onClick={toggleSidebar}>
-              {language === "ar" ? <PanelLeftOpen className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
-            </Button>
-          )}
         </div>
 
         {/* User profile section at the bottom */}
@@ -229,12 +224,6 @@ function SuperAdminLayout() {
                   {t("language")}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                {!isSidebarCollapsed && (
-                  <DropdownMenuItem onClick={toggleSidebar}>
-                    {language === "ar" ? <PanelLeftOpen className="w-4 h-4 mr-2" /> : <PanelLeftClose className="w-4 h-4 mr-2" />}
-                    Collapse Sidebar
-                  </DropdownMenuItem>
-                )}
                 <DropdownMenuItem onClick={signOut} className="text-destructive">
                   <LogOut className="w-4 h-4 mr-2" />
                   {t("logout")}
