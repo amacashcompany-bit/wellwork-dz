@@ -40,7 +40,7 @@ export const sendAccessTokenEmail = createServerFn({ method: "POST" })
         <p>Pour commencer, veuillez utiliser ce code d'accès lors de la création de votre compte sur notre plateforme.</p>
         
         <div style="text-align: center; margin: 30px 0;">
-          <a href="http://localhost:5000/auth" style="background-color: #10B981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
+          <a href="https://wellwork.dz/auth" style="background-color: #10B981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
             Accéder à la plateforme
           </a>
         </div>
@@ -53,11 +53,24 @@ export const sendAccessTokenEmail = createServerFn({ method: "POST" })
       </div>
     `;
 
+    const textBody = `
+Bonjour l'équipe ${companyName},
+
+Nous sommes ravis de vous accueillir ! Votre demande de démo a été approuvée par notre équipe.
+Voici votre code d'accès unique : ${token}
+
+Veuillez utiliser ce code lors de la création de votre compte sur notre plateforme.
+
+Ceci est un message automatique de WellWork.
+`;
+
     try {
       await transporter.sendMail({
-        from: '"WellWork Support" <' + user + '>',
+        from: '"Equipe WellWork" <' + user + '>',
         to: email,
-        subject: "Votre accès exclusif à WellWork - Démo Approuvée 🎉",
+        replyTo: user,
+        subject: "Vos identifiants d'accès WellWork",
+        text: textBody,
         html: htmlBody,
       });
       return { success: true };
