@@ -135,7 +135,7 @@ function SuperAdminDashboard() {
     try {
       await sendAccessTokenEmail({ 
         data: { 
-          email: selectedDemo.email, 
+          email: selectedDemo.contact_email, 
           companyName: selectedDemo.company_name, 
           token 
         } 
