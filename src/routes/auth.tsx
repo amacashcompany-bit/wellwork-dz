@@ -66,7 +66,8 @@ function AuthPage() {
 
   const doGoogle = async () => {
     setBusy(true);
-    sessionStorage.setItem("wellwork-oauth-intent", "employee");
+    sessionStorage.removeItem("wellwork-employee-onboarding");
+    sessionStorage.setItem("wellwork-oauth-intent", "onboarding");
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
