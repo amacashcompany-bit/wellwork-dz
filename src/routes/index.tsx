@@ -48,18 +48,18 @@ function Landing() {
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden font-sans">
       {/* ============== NAV ============== */}
       <header className="fixed top-0 inset-x-0 z-50 glass border-b border-border/40">
-        <div className="max-w-7xl mx-auto flex items-center justify-between h-16 px-6">
-          <Link to="/" className="flex items-center gap-2.5 group">
+        <div className="max-w-7xl mx-auto grid grid-cols-[1fr_auto] items-center gap-x-2 px-4 pb-12 pt-2 sm:flex sm:h-16 sm:px-6 sm:py-0">
+          <Link to="/" className="flex min-w-0 items-center gap-2 group sm:gap-2.5">
             <motion.img
               src={logoMark}
               alt="WellWork"
-              className="w-9 h-9 object-contain drop-shadow-[0_2px_8px_rgba(16,185,129,0.35)]"
+              className="h-8 w-8 shrink-0 object-contain drop-shadow-[0_2px_8px_rgba(16,185,129,0.35)] sm:h-9 sm:w-9"
               initial={{ rotate: -8, scale: 0.9, opacity: 0 }}
               animate={{ rotate: 0, scale: 1, opacity: 1 }}
               transition={{ type: "spring", stiffness: 200, damping: 14, delay: 0.1 }}
               whileHover={{ rotate: [0, -6, 6, 0], scale: 1.08, transition: { duration: 0.6 } }}
             />
-            <span className="font-display font-bold text-lg tracking-tight">WellWork</span>
+            <span className="truncate font-display text-base font-bold tracking-normal sm:text-lg">WellWork</span>
           </Link>
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
             <a href="#platform" className="hover:text-foreground transition">{t("landingNavPlatform")}</a>
@@ -67,10 +67,10 @@ function Landing() {
             <a href="#insights" className="hover:text-foreground transition">{t("landingNavInsights")}</a>
             <a href="#pricing" className="hover:text-foreground transition">{t("landingNavPricing")}</a>
           </nav>
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="gap-1.5 px-2 text-muted-foreground hover:text-foreground">
+                <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-foreground sm:w-auto sm:gap-1.5 sm:px-2">
                   <img src={currentLang.flag} alt={currentLang.code} className="w-4 h-3 object-cover rounded-sm shadow-sm" />
                   <span className="hidden sm:inline uppercase text-xs font-semibold">{currentLang.code}</span>
                 </Button>
@@ -84,21 +84,21 @@ function Landing() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <Button variant="ghost" size="icon" onClick={toggleDark} aria-label="Toggle theme" className="text-muted-foreground hover:text-foreground">
+            <Button variant="ghost" size="icon" onClick={toggleDark} aria-label="Toggle theme" className="h-9 w-9 text-muted-foreground hover:text-foreground">
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </Button>
 
             {user ? (
-              <Link to="/onboarding">
-                <Button className="gradient-brand text-white border-0 h-10 rounded-full px-5 shadow-elegant">
+              <Link to="/onboarding" className="absolute left-4 right-4 top-[3.25rem] sm:static sm:w-auto">
+                <Button className="gradient-brand h-9 w-full rounded-full border-0 px-5 text-white shadow-elegant sm:h-10 sm:w-auto">
                   Tableau de bord
                 </Button>
               </Link>
             ) : (
               <>
                 <Link to="/auth" className="text-sm font-medium hover:text-brand transition-colors hidden sm:inline-flex px-3">{t("landingLogin")}</Link>
-                <Link to="/auth">
-                  <Button className="gradient-leaf text-white border-0 h-10 rounded-full px-5 shadow-elegant">
+                <Link to="/auth" className="absolute left-4 right-4 top-[3.25rem] sm:static">
+                  <Button className="gradient-leaf h-9 w-full rounded-full border-0 px-5 text-sm text-white shadow-elegant sm:h-10 sm:w-auto">
                     {t("landingDemoBtn")} <ArrowUpRight className="w-4 h-4 ms-1" />
                   </Button>
                 </Link>
@@ -109,7 +109,7 @@ function Landing() {
       </header>
 
       {/* ============== HERO ============== */}
-      <section className="relative pt-28 pb-16 md:pt-36 md:pb-24 px-6 gradient-woba">
+      <section className="relative px-5 pb-16 pt-36 sm:px-6 sm:pt-28 md:pt-36 md:pb-24 gradient-woba">
         <div className="relative max-w-7xl mx-auto grid lg:grid-cols-[1.05fr_1fr] gap-10 lg:gap-16 items-center">
           <div>
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
