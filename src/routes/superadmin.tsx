@@ -276,7 +276,7 @@ function SuperAdminLayout() {
         </div>
       </main>
 
-      <MobileNavigation variant="superadmin" />
+      <MobileNavigation variant="superadmin" onLogout={signOut} />
 
       {/* Profile Dialog */}
       <Dialog open={isProfileOpen} onOpenChange={setIsProfileOpen}>

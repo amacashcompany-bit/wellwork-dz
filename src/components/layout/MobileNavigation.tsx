@@ -8,6 +8,7 @@ import {
   Home,
   LayoutDashboard,
   Lightbulb,
+  LogOut,
   Menu,
   MessageSquare,
   Plug,
@@ -22,6 +23,7 @@ import { motion } from "framer-motion";
 import type { ComponentType } from "react";
 import logoMark from "@/assets/brand/wellwork-logo-mark.png";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
 import { hasRole, useManagerPermissions, useMySpace } from "@/hooks/useAuth";
 import { useI18n } from "@/hooks/useI18n";
 import { managerAccessForPath } from "@/lib/manager-access";
@@ -29,6 +31,7 @@ import { useStore } from "@/store/useStore";
 
 type MobileNavigationProps = {
   variant?: "workspace" | "superadmin";
+  onLogout?: () => void | Promise<void>;
 };
 
 type NavItem = {
@@ -75,7 +78,7 @@ function isActivePath(pathname: string, to: string) {
   return pathname === to || (to !== "/" && pathname.startsWith(`${to}/`));
 }
 
-export function MobileNavigation({ variant = "workspace" }: MobileNavigationProps) {
+export function MobileNavigation({ variant = "workspace", onLogout }: MobileNavigationProps) {
   const location = useLocation();
   const { pick } = useI18n();
   const { info } = useMySpace();
@@ -170,6 +173,20 @@ export function MobileNavigation({ variant = "workspace" }: MobileNavigationProp
               );
             })}
           </div>
+          {onLogout && (
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => {
+                setOpen(false);
+                void onLogout();
+              }}
+              className="mt-4 h-11 w-full justify-center gap-2 border border-destructive/25 bg-destructive/5 text-destructive hover:bg-destructive/10 hover:text-destructive"
+            >
+              <LogOut className="h-4 w-4" />
+              {pick("Déconnexion", "تسجيل الخروج", "Logout")}
+            </Button>
+          )}
         </SheetContent>
       </Sheet>
     </>
