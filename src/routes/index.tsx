@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { WellWorkChatbot } from "@/components/landing/WellWorkChatbot";
 import { useI18n } from "@/hooks/useI18n";
 import { useStore } from "@/store/useStore";
 import { LANGS } from "@/lib/i18n";
@@ -383,6 +384,7 @@ function Landing() {
           <div>{t("landingFooterLegal")}</div>
         </div>
       </footer>
+      <WellWorkChatbot />
     </div>
   );
 }
