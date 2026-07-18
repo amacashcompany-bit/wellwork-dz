@@ -1,7 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { AlertTriangle, Bot, Building2, CheckCircle2, TrendingUp, Users } from "lucide-react";
+import {
+  AlertTriangle,
+  Bot,
+  Building2,
+  CheckCircle2,
+  Database,
+  Loader2,
+  Play,
+  ShieldCheck,
+  Sparkles,
+  TrendingUp,
+  Users,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
 import { PageHeader } from "@/components/layout/AppShell";
@@ -12,151 +24,443 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useI18n } from "@/hooks/useI18n";
-import { useStore } from "@/store/useStore";
-import type { BurnoutAlert } from "@/types";
+import { useMySpace } from "@/hooks/useAuth";
+import {
+  getBurnoutResults,
+  resolveBurnoutAlert,
+  runBurnoutAnalysis,
+  type BurnoutResult,
+} from "@/lib/burnout-analysis";
 
 export const Route = createFileRoute("/admin/burnout")({
-  head: () => ({ meta: [{ title: "Moteur IA Burn-out — QVT-Care" }] }),
+  head: () => ({ meta: [{ title: "Burn-out prevention - WellWork" }] }),
   component: BurnoutPage,
 });
 
-const sevMap = {
-  critical: { cls: "bg-danger/10 text-danger border-danger/20", dot: "bg-danger", label: { fr: "Critique", ar: "حرج", en: "Critical" } },
-  high:     { cls: "bg-orange-500/10 text-orange-600 border-orange-500/20", dot: "bg-orange-500", label: { fr: "Élevé", ar: "مرتفع", en: "High" } },
-  medium:   { cls: "bg-warning/15 text-warning border-warning/25", dot: "bg-warning", label: { fr: "Moyen", ar: "متوسط", en: "Medium" } },
+const severityStyle = {
+  critical: {
+    cls: "bg-danger/10 text-danger border-danger/20",
+    dot: "bg-danger",
+    label: { fr: "Critique", ar: "حرج", en: "Critical" },
+  },
+  high: {
+    cls: "bg-orange-500/10 text-orange-600 border-orange-500/20",
+    dot: "bg-orange-500",
+    label: { fr: "Eleve", ar: "مرتفع", en: "High" },
+  },
+  medium: {
+    cls: "bg-warning/15 text-warning border-warning/25",
+    dot: "bg-warning",
+    label: { fr: "Vigilance", ar: "مراقبة", en: "Watch" },
+  },
 } as const;
 
+function errorMessage(error: unknown, fallback: string) {
+  return error instanceof Error && error.message ? error.message : fallback;
+}
+
 function BurnoutPage() {
-  const { pick } = useI18n();
-  const alerts = useStore((s) => s.burnoutAlerts);
-  const resolveAlert = useStore((s) => s.resolveAlert);
-  const [selected, setSelected] = useState<BurnoutAlert | null>(null);
-  const active = alerts.filter((a) => a.status === "active");
+  const { language, pick } = useI18n();
+  const { info, loading: spaceLoading } = useMySpace();
+  const [alerts, setAlerts] = useState<BurnoutResult[]>([]);
+  const [selected, setSelected] = useState<BurnoutResult | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [running, setRunning] = useState(false);
+  const [resolvingId, setResolvingId] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [analysisMeta, setAnalysisMeta] = useState<{
+    groupsAnalyzed: number;
+    groupsBelowMinimum: number;
+    source: "atomesus" | "statistical";
+  } | null>(null);
+
+  const activeAlerts = alerts.filter((alert) => alert.status !== "resolved");
+  const latestAt = activeAlerts[0]?.analyzedAt;
+
+  const load = useCallback(async () => {
+    if (!info?.spaceId) return;
+    setLoading(true);
+    setLoadError(null);
+    try {
+      const result = await getBurnoutResults({
+        data: { spaceId: info.spaceId, locale: language },
+      });
+      setAlerts(result.alerts.filter((alert) => alert.status !== "resolved"));
+    } catch (error) {
+      setLoadError(
+        errorMessage(
+          error,
+          language === "ar"
+            ? "تعذر تحميل التحليلات."
+            : language === "en"
+              ? "Unable to load analyses."
+              : "Impossible de charger les analyses.",
+        ),
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [info?.spaceId, language]);
+
+  useEffect(() => {
+    if (!spaceLoading && info?.spaceId) void load();
+  }, [spaceLoading, info?.spaceId, load]);
+
+  const runAnalysis = async () => {
+    if (!info?.spaceId || running) return;
+    setRunning(true);
+    setLoadError(null);
+    try {
+      const result = await runBurnoutAnalysis({
+        data: { spaceId: info.spaceId, locale: language },
+      });
+      setAlerts(result.alerts);
+      setAnalysisMeta({
+        groupsAnalyzed: result.groupsAnalyzed,
+        groupsBelowMinimum: Math.max(0, result.groupsBelowMinimum),
+        source: result.source,
+      });
+      if (result.groupsAnalyzed === 0) {
+        toast.info(
+          pick(
+            "Pas encore assez de reponses anonymes (minimum 6 par groupe).",
+            "لا توجد ردود مجهولة كافية بعد (الحد الأدنى 6 لكل مجموعة).",
+            "Not enough anonymous responses yet (minimum 6 per group).",
+          ),
+        );
+      } else if (result.alerts.length === 0) {
+        toast.success(
+          pick(
+            "Analyse terminee : aucun signal au-dessus du seuil de vigilance.",
+            "اكتمل التحليل: لا توجد إشارة فوق حد المراقبة.",
+            "Analysis complete: no signal is above the watch threshold.",
+          ),
+        );
+      } else {
+        toast.success(
+          pick(
+            `${result.alerts.length} signal(aux) de prevention detecte(s).`,
+            `تم اكتشاف ${result.alerts.length} إشارة وقائية.`,
+            `${result.alerts.length} prevention signal(s) detected.`,
+          ),
+        );
+      }
+    } catch (error) {
+      const message = errorMessage(
+        error,
+        pick("L'analyse a echoue.", "فشل التحليل.", "Analysis failed."),
+      );
+      setLoadError(message);
+      toast.error(message);
+    } finally {
+      setRunning(false);
+    }
+  };
+
+  const resolveAlert = async (alert: BurnoutResult) => {
+    if (!info?.spaceId || resolvingId) return;
+    setResolvingId(alert.id);
+    try {
+      await resolveBurnoutAlert({
+        data: { spaceId: info.spaceId, alertId: alert.id, locale: language },
+      });
+      setAlerts((current) => current.filter((item) => item.id !== alert.id));
+      setSelected(null);
+      toast.success(pick("Alerte resolue.", "تم حل التنبيه.", "Alert resolved."));
+    } catch (error) {
+      toast.error(
+        errorMessage(error, pick("Action impossible.", "تعذر تنفيذ الإجراء.", "Action failed.")),
+      );
+    } finally {
+      setResolvingId(null);
+    }
+  };
 
   return (
     <div>
       <PageHeader
-        title={pick("Moteur IA de détection précoce", "محرك الكشف المبكر بالذكاء الاصطناعي", "AI Early Detection Engine")}
-        subtitle={pick("Analyse continue de signaux faibles multi-sources. Alertes uniquement si n ≥ 6 pour préserver l'anonymat.", "تحليل مستمر للمؤشرات الضعيفة. تنبيهات فقط إذا n ≥ 6 لحماية الهوية.", "Continuous analysis of weak signals. Alerts only when n ≥ 6 to preserve anonymity.")}
+        title={pick(
+          "Analyse preventive du risque burn-out",
+          "التحليل الوقائي لمخاطر الاحتراق الوظيفي",
+          "Preventive burn-out risk analysis",
+        )}
+        subtitle={pick(
+          "Analyse des reponses anonymes et indicateurs collectifs. Resultats affiches uniquement pour n >= 6.",
+          "تحليل الردود المجهولة والمؤشرات الجماعية. تظهر النتائج فقط عندما يكون العدد 6 أو أكثر.",
+          "Analysis of anonymous responses and team indicators. Results appear only when n >= 6.",
+        )}
+        actions={
+          <Button
+            onClick={runAnalysis}
+            disabled={running || loading || !info?.spaceId}
+            className="gradient-brand text-white border-0 gap-2"
+          >
+            {running ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
+            {pick("Lancer l'analyse", "بدء التحليل", "Run analysis")}
+          </Button>
+        }
       />
 
-      {/* Glassmorphism status widget */}
-      <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }}>
-        <Card className="glass rounded-3xl p-6 mb-6 relative overflow-hidden">
-          <div className="absolute inset-0 gradient-hero opacity-60 pointer-events-none" />
-          <div className="relative flex items-center gap-4">
-            <div className="relative">
-              <div className="w-14 h-14 rounded-2xl gradient-brand flex items-center justify-center shadow-elegant">
-                <Bot className="w-7 h-7 text-white" />
-              </div>
-              <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-danger pulse-dot" />
+      <Card className="mb-6 overflow-hidden border-brand/15 p-5 sm:p-6">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+          <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg gradient-brand shadow-sm">
+            {running ? (
+              <Loader2 className="h-6 w-6 animate-spin text-white" />
+            ) : (
+              <Bot className="h-6 w-6 text-white" />
+            )}
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="text-xs uppercase text-muted-foreground">
+              {pick("Etat de l'analyse", "حالة التحليل", "Analysis status")}
             </div>
-            <div className="flex-1">
-              <div className="text-xs uppercase tracking-wide text-muted-foreground">{pick("Statut du moteur", "حالة المحرك", "Engine Status")}</div>
-              <div className="text-lg font-bold">{active.length} {pick("alertes actives — surveillance en temps réel", "تنبيهات نشطة — مراقبة لحظية", "active alerts — real-time monitoring")}</div>
-              <div className="text-xs text-muted-foreground mt-1">{pick("Dernière analyse : il y a 2 minutes · Modèle : QVT-BERT v2.1", "آخر تحليل: منذ دقيقتين · النموذج: QVT-BERT v2.1", "Last analysis: 2 min ago · Model: QVT-BERT v2.1")}</div>
+            <div className="mt-1 text-lg font-bold">
+              {running
+                ? pick(
+                    "Analyse des agregats en cours...",
+                    "جارٍ تحليل البيانات المجمعة...",
+                    "Analyzing aggregates...",
+                  )
+                : pick(
+                    `${activeAlerts.length} signal(aux) actif(s)`,
+                    `${activeAlerts.length} إشارة نشطة`,
+                    `${activeAlerts.length} active signal(s)`,
+                  )}
             </div>
-            <Badge className="bg-brand/10 text-brand border-brand/20">v2.1</Badge>
+            <div className="mt-1 text-xs text-muted-foreground">
+              {latestAt
+                ? `${pick("Derniere analyse", "آخر تحليل", "Last analysis")}: ${new Date(latestAt).toLocaleString(language)}`
+                : pick(
+                    "Aucune analyse enregistree. Lancez la premiere analyse lorsque les reponses sont disponibles.",
+                    "لا يوجد تحليل مسجل. ابدأ التحليل الأول عند توفر الردود.",
+                    "No saved analysis. Run the first analysis when responses are available.",
+                  )}
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Badge variant="outline" className="gap-1.5 border-success/25 text-success">
+              <ShieldCheck className="h-3.5 w-3.5" />
+              {pick("Anonymat n >= 6", "مجهولية n >= 6", "Anonymous n >= 6")}
+            </Badge>
+            <Badge variant="outline" className="gap-1.5">
+              <Database className="h-3.5 w-3.5" />
+              {analysisMeta?.source === "atomesus"
+                ? "Atomesus + score"
+                : pick("Score statistique", "درجة إحصائية", "Statistical score")}
+            </Badge>
+          </div>
+        </div>
+      </Card>
+
+      {loadError && (
+        <Card className="mb-6 border-danger/30 bg-danger/5 p-4 text-sm text-danger">
+          <div className="flex items-start gap-2">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+            <div className="flex-1">{loadError}</div>
+            <Button variant="outline" size="sm" onClick={load}>
+              {pick("Reessayer", "إعادة المحاولة", "Retry")}
+            </Button>
           </div>
         </Card>
-      </motion.div>
+      )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {active.map((a, i) => {
-          const s = sevMap[a.severity];
-          return (
-            <motion.div key={a.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}>
-              <Card className="p-5 rounded-2xl hover:shadow-elegant transition-all h-full">
-                <div className="flex items-start justify-between gap-3 mb-3">
-                  <Badge variant="outline" className={`gap-1.5 ${s.cls}`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
-                    {pick(s.label.fr, s.label.ar, s.label.en)}
-                  </Badge>
-                  <div className="text-xs text-muted-foreground">{a.detectedAt}</div>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                  <Building2 className="w-4 h-4" /> {pick(a.department, a.departmentAr, a.department)}
-                  <span>·</span>
-                  <Users className="w-3.5 h-3.5" /> n={a.populationSize}
-                </div>
-                <div className="font-semibold text-base leading-snug mb-2">{pick(a.title, a.titleAr, a.title)}</div>
-                <p className="text-sm text-muted-foreground">{pick(a.description, a.descriptionAr, a.description)}</p>
-                <div className="mt-3 h-16 -mx-2">
-                  <ResponsiveContainer>
-                    <AreaChart data={a.trend.map((v, idx) => ({ i: idx, v }))}>
-                      <defs>
-                        <linearGradient id={`g-${a.id}`} x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="var(--danger)" stopOpacity={0.5} />
-                          <stop offset="100%" stopColor="var(--danger)" stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
-                      <Area type="monotone" dataKey="v" stroke="var(--danger)" strokeWidth={2} fill={`url(#g-${a.id})`} />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="flex gap-2 mt-4 pt-3 border-t border-border/60">
-                  <Button variant="outline" size="sm" className="flex-1" onClick={() => setSelected(a)}>
-                    <TrendingUp className="w-4 h-4 me-1.5" /> {pick("Détails", "تفاصيل", "Details")}
-                  </Button>
-                  <Button size="sm" className="flex-1 gradient-brand text-white border-0" onClick={() => { resolveAlert(a.id); toast.success(pick("Alerte marquée résolue", "تم حل التنبيه", "Alert resolved")); }}>
-                    <CheckCircle2 className="w-4 h-4 me-1.5" /> {pick("Résoudre", "حل", "Resolve")}
-                  </Button>
-                </div>
-              </Card>
-            </motion.div>
-          );
-        })}
-      </div>
+      {analysisMeta && (
+        <div className="mb-5 flex flex-wrap gap-2 text-xs text-muted-foreground">
+          <span>
+            {pick("Groupes analyses", "المجموعات المحللة", "Groups analyzed")}:{" "}
+            {analysisMeta.groupsAnalyzed}
+          </span>
+          <span aria-hidden="true">•</span>
+          <span>
+            {pick("Masques par anonymat", "مخفية لحماية الهوية", "Hidden for anonymity")}:{" "}
+            {analysisMeta.groupsBelowMinimum}
+          </span>
+        </div>
+      )}
 
-      <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
-        <DialogContent className="max-w-2xl rounded-2xl">
+      {loading ? (
+        <div className="grid min-h-56 place-items-center">
+          <Loader2 className="h-7 w-7 animate-spin text-brand" />
+        </div>
+      ) : activeAlerts.length === 0 ? (
+        <Card className="grid min-h-64 place-items-center border-dashed p-8 text-center">
+          <div className="max-w-lg">
+            <div className="mx-auto grid h-12 w-12 place-items-center rounded-lg bg-success/10 text-success">
+              <ShieldCheck className="h-6 w-6" />
+            </div>
+            <h2 className="mt-4 text-lg font-semibold">
+              {pick("Aucun signal actif", "لا توجد إشارة نشطة", "No active signal")}
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {pick(
+                "Cela signifie qu'aucun groupe eligible ne depasse le seuil, ou qu'il n'y a pas encore six reponses anonymes. Ce resultat n'est pas un diagnostic.",
+                "هذا يعني أنه لا توجد مجموعة مؤهلة تتجاوز الحد، أو أنه لا توجد ستة ردود مجهولة بعد. هذه النتيجة ليست تشخيصاً.",
+                "No eligible group is above the threshold, or six anonymous responses are not available yet. This result is not a diagnosis.",
+              )}
+            </p>
+          </div>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          {activeAlerts.map((alert, index) => {
+            const style = severityStyle[alert.severity];
+            return (
+              <motion.div
+                key={alert.id}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+              >
+                <Card className="flex h-full flex-col p-5">
+                  <div className="mb-3 flex items-start justify-between gap-3">
+                    <Badge variant="outline" className={`gap-1.5 ${style.cls}`}>
+                      <span className={`h-1.5 w-1.5 rounded-full ${style.dot}`} />
+                      {pick(style.label.fr, style.label.ar, style.label.en)}
+                    </Badge>
+                    <div className="text-end">
+                      <div className="text-xl font-bold">{alert.score}/100</div>
+                      <div className="text-[10px] text-muted-foreground">
+                        {pick("Confiance", "الثقة", "Confidence")} {alert.confidence}%
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mb-2 flex items-center gap-2 text-sm text-muted-foreground">
+                    <Building2 className="h-4 w-4" /> {alert.department}
+                    <span>•</span>
+                    <Users className="h-3.5 w-3.5" /> n={alert.populationSize}
+                  </div>
+                  <h2 className="font-semibold">{alert.title}</h2>
+                  <p className="mt-2 flex-1 text-sm text-muted-foreground">{alert.summary}</p>
+                  <div className="mt-3 h-16">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart
+                        data={alert.trend.map((value, itemIndex) => ({ itemIndex, value }))}
+                      >
+                        <defs>
+                          <linearGradient id={`risk-${alert.id}`} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="var(--danger)" stopOpacity={0.4} />
+                            <stop offset="100%" stopColor="var(--danger)" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <Area
+                          type="monotone"
+                          dataKey="value"
+                          stroke="var(--danger)"
+                          strokeWidth={2}
+                          fill={`url(#risk-${alert.id})`}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="mt-4 flex gap-2 border-t border-border/60 pt-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => setSelected(alert)}
+                    >
+                      <TrendingUp className="me-1.5 h-4 w-4" />
+                      {pick("Details", "التفاصيل", "Details")}
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="flex-1 gradient-brand text-white border-0"
+                      disabled={resolvingId === alert.id}
+                      onClick={() => resolveAlert(alert)}
+                    >
+                      {resolvingId === alert.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <CheckCircle2 className="me-1.5 h-4 w-4" />
+                      )}
+                      {pick("Resoudre", "حل", "Resolve")}
+                    </Button>
+                  </div>
+                </Card>
+              </motion.div>
+            );
+          })}
+        </div>
+      )}
+
+      <Dialog open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
+        <DialogContent className="max-w-2xl">
           {selected && (
             <>
               <DialogHeader>
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className="w-5 h-5 text-danger" />
-                  <DialogTitle>{pick(selected.title, selected.titleAr, selected.title)}</DialogTitle>
-                </div>
+                <DialogTitle className="flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-brand" />
+                  {selected.title}
+                </DialogTitle>
               </DialogHeader>
               <div className="space-y-5">
                 <div className="grid grid-cols-3 gap-3 text-center">
-                  <div className="rounded-xl bg-muted p-3">
-                    <div className="text-[10px] uppercase text-muted-foreground">{pick("Sévérité", "الخطورة", "Severity")}</div>
-                    <div className="mt-1 font-semibold">{pick(sevMap[selected.severity].label.fr, sevMap[selected.severity].label.ar, sevMap[selected.severity].label.en)}</div>
+                  <div className="bg-muted p-3">
+                    <div className="text-[10px] uppercase text-muted-foreground">
+                      {pick("Score", "الدرجة", "Score")}
+                    </div>
+                    <div className="mt-1 font-semibold">{selected.score}/100</div>
                   </div>
-                  <div className="rounded-xl bg-muted p-3">
-                    <div className="text-[10px] uppercase text-muted-foreground">{pick("Département", "القسم", "Department")}</div>
-                    <div className="mt-1 font-semibold">{pick(selected.department, selected.departmentAr, selected.department)}</div>
+                  <div className="bg-muted p-3">
+                    <div className="text-[10px] uppercase text-muted-foreground">
+                      {pick("Confiance", "الثقة", "Confidence")}
+                    </div>
+                    <div className="mt-1 font-semibold">{selected.confidence}%</div>
                   </div>
-                  <div className="rounded-xl bg-muted p-3">
-                    <div className="text-[10px] uppercase text-muted-foreground">{pick("Population", "العدد", "Population")}</div>
-                    <div className="mt-1 font-semibold">n = {selected.populationSize}</div>
+                  <div className="bg-muted p-3">
+                    <div className="text-[10px] uppercase text-muted-foreground">
+                      {pick("Population", "العدد", "Population")}
+                    </div>
+                    <div className="mt-1 font-semibold">n={selected.populationSize}</div>
                   </div>
                 </div>
 
                 <div>
-                  <div className="text-sm font-semibold mb-3">{pick("Facteurs contributifs (SHAP)", "العوامل المساهمة (SHAP)", "Contributing factors (SHAP)")}</div>
-                  <div className="space-y-2">
-                    {selected.drivers.map((d) => (
-                      <div key={d.label}>
-                        <div className="flex justify-between text-xs mb-1"><span>{pick(d.label, d.labelAr, d.label)}</span><span className="font-medium">{d.weight}%</span></div>
-                        <Progress value={d.weight} className="h-1.5" />
+                  <div className="mb-3 text-sm font-semibold">
+                    {pick(
+                      "Facteurs contributifs agreges",
+                      "العوامل المجمعة المساهمة",
+                      "Aggregated contributing factors",
+                    )}
+                  </div>
+                  <div className="space-y-3">
+                    {selected.drivers.map((driver) => (
+                      <div key={driver.label}>
+                        <div className="mb-1 flex justify-between text-xs">
+                          <span>{driver.label}</span>
+                          <span className="font-medium">{driver.weight}%</span>
+                        </div>
+                        <Progress value={driver.weight} className="h-1.5" />
                       </div>
                     ))}
                   </div>
                 </div>
 
                 <div>
-                  <div className="text-sm font-semibold mb-3">{pick("Actions recommandées", "الإجراءات الموصى بها", "Recommended actions")}</div>
+                  <div className="mb-3 text-sm font-semibold">
+                    {pick("Actions recommandees", "الإجراءات الموصى بها", "Recommended actions")}
+                  </div>
                   <div className="space-y-2">
-                    {(pick(selected.recommendations, selected.recommendationsAr, selected.recommendations)).map((r, i) => (
-                      <label key={i} className="flex items-start gap-3 p-3 rounded-xl border cursor-pointer hover:bg-muted/50">
+                    {selected.recommendations.map((recommendation, index) => (
+                      <label
+                        key={`${selected.id}-${index}`}
+                        className="flex cursor-pointer items-start gap-3 border p-3 hover:bg-muted/50"
+                      >
                         <Checkbox />
-                        <span className="text-sm">{r}</span>
+                        <span className="text-sm">{recommendation}</span>
                       </label>
                     ))}
                   </div>
                 </div>
+
+                <p className="flex items-start gap-2 border-t pt-4 text-xs text-muted-foreground">
+                  <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                  {pick(
+                    "Outil de prevention collectif. Ne remplace pas l'evaluation d'un professionnel de sante au travail.",
+                    "أداة وقاية جماعية ولا تحل محل تقييم مختص في الصحة المهنية.",
+                    "Team prevention tool. It does not replace an occupational-health professional's assessment.",
+                  )}
+                </p>
               </div>
             </>
           )}

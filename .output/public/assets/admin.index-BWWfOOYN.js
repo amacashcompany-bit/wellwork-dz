@@ -1,0 +1,1 @@
+import{o as e,t}from"./react-Ca03aNmg.js";import{H as n}from"./index-Ckiev4mi.js";var r=e(t()),i=()=>{let e=n();return(0,r.useEffect)(()=>{e({to:`/admin/dashboard`,replace:!0})},[e]),null};export{i as component};
