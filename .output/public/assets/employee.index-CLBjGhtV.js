@@ -1,0 +1,1 @@
+import{o as e,t}from"./react-Ca03aNmg.js";import{H as n}from"./index-4x3y76IH.js";var r=e(t()),i=()=>{let e=n();return(0,r.useEffect)(()=>{e({to:`/employee/home`,replace:!0})},[e]),null};export{i as component};

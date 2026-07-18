@@ -1,29 +1,39 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  Bot,
-  ChevronRight,
-  ExternalLink,
-  Loader2,
-  MessageCircle,
-  Mic,
-  Send,
-  Sparkles,
-  X,
-} from "lucide-react";
+import { Bot, ChevronRight, ExternalLink, MessageCircle, Mic, Send, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { useI18n } from "@/hooks/useI18n";
-import {
-  askWellWorkAssistant,
-  type WellWorkChatMessage,
-} from "@/lib/wellwork-chat";
+import { getInstantWellWorkAnswer, type WellWorkChatMessage } from "@/lib/wellwork-chat";
 import logoMark from "@/assets/brand/wellwork-logo-mark.png";
 
 type DisplayMessage = WellWorkChatMessage & {
   id: string;
 };
+
+type SpeechResultEvent = {
+  results?: {
+    [index: number]: {
+      [index: number]: {
+        transcript?: string;
+      };
+    };
+  };
+};
+
+type SpeechRecognitionInstance = {
+  lang: string;
+  interimResults: boolean;
+  maxAlternatives: number;
+  onstart: () => void;
+  onend: () => void;
+  onerror: () => void;
+  onresult: (event: SpeechResultEvent) => void;
+  start: () => void;
+};
+
+type SpeechRecognitionConstructor = new () => SpeechRecognitionInstance;
 
 const copy = {
   fr: {
@@ -102,7 +112,6 @@ export function WellWorkChatbot() {
   const text = copy[language];
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
   const [messages, setMessages] = useState<DisplayMessage[]>([]);
   const endRef = useRef<HTMLDivElement>(null);
@@ -112,7 +121,10 @@ export function WellWorkChatbot() {
     () => ({ id: `greeting-${language}`, role: "assistant", content: text.greeting }),
     [language, text.greeting],
   );
-  const visibleMessages = messages.length === 0 ? [greeting] : messages;
+  const visibleMessages = useMemo(
+    () => (messages.length === 0 ? [greeting] : messages),
+    [greeting, messages],
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -122,7 +134,7 @@ export function WellWorkChatbot() {
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [visibleMessages, loading]);
+  }, [visibleMessages]);
 
   useEffect(() => {
     const closeOnEscape = (event: KeyboardEvent) => {
@@ -132,45 +144,28 @@ export function WellWorkChatbot() {
     return () => window.removeEventListener("keydown", closeOnEscape);
   }, []);
 
-  const submit = async (question = input) => {
+  const submit = (question = input) => {
     const content = question.trim();
-    if (!content || loading) return;
+    if (!content) return;
 
     const currentMessages = messages.length === 0 ? [greeting] : messages;
     const userMessage: DisplayMessage = { id: makeId(), role: "user", content };
-    const nextMessages = [...currentMessages, userMessage];
-    setMessages(nextMessages);
+    const assistantMessage: DisplayMessage = {
+      id: makeId(),
+      role: "assistant",
+      content: getInstantWellWorkAnswer(content, language),
+    };
+    setMessages([...currentMessages, userMessage, assistantMessage]);
     setInput("");
-    setLoading(true);
-
-    try {
-      const result = await askWellWorkAssistant({
-        data: {
-          locale: language,
-          messages: nextMessages.map(({ role, content: messageContent }) => ({
-            role,
-            content: messageContent,
-          })),
-        },
-      });
-      setMessages((current) => [
-        ...current,
-        { id: makeId(), role: "assistant", content: result.answer },
-      ]);
-    } catch (error) {
-      console.error("[WellWork chat] Request failed.", error);
-      setMessages((current) => [
-        ...current,
-        { id: makeId(), role: "assistant", content: text.error },
-      ]);
-    } finally {
-      setLoading(false);
-    }
   };
 
   const startListening = () => {
+    const speechWindow = window as typeof window & {
+      SpeechRecognition?: SpeechRecognitionConstructor;
+      webkitSpeechRecognition?: SpeechRecognitionConstructor;
+    };
     const SpeechRecognition =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      speechWindow.SpeechRecognition || speechWindow.webkitSpeechRecognition;
     if (!SpeechRecognition) return;
 
     const recognition = new SpeechRecognition();
@@ -180,7 +175,7 @@ export function WellWorkChatbot() {
     recognition.onstart = () => setListening(true);
     recognition.onend = () => setListening(false);
     recognition.onerror = () => setListening(false);
-    recognition.onresult = (event: any) => {
+    recognition.onresult = (event) => {
       const transcript = event.results?.[0]?.[0]?.transcript;
       if (transcript) setInput(transcript);
     };
@@ -284,17 +279,6 @@ export function WellWorkChatbot() {
                   </div>
                 )}
 
-                {loading && (
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <div className="grid h-7 w-7 place-items-center rounded-md bg-primary text-primary-foreground">
-                      <Sparkles className="h-3.5 w-3.5" />
-                    </div>
-                    <span className="flex items-center gap-1.5">
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      WellWork…
-                    </span>
-                  </div>
-                )}
                 <div ref={endRef} />
               </div>
             </ScrollArea>
@@ -314,7 +298,6 @@ export function WellWorkChatbot() {
                   placeholder={text.placeholder}
                   rows={1}
                   className="max-h-24 min-h-9 resize-none border-0 bg-transparent px-2 py-2 text-sm shadow-none focus-visible:ring-0"
-                  disabled={loading}
                 />
                 <Button
                   type="button"
@@ -331,10 +314,10 @@ export function WellWorkChatbot() {
                   size="icon"
                   className="gradient-brand h-9 w-9 shrink-0 border-0 text-white hover:opacity-90"
                   onClick={() => submit()}
-                  disabled={!input.trim() || loading}
+                  disabled={!input.trim()}
                   aria-label={text.send}
                 >
-                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                  <Send className="h-4 w-4" />
                 </Button>
               </div>
               <p className="mt-2 text-center text-[10px] text-muted-foreground">{text.note}</p>
