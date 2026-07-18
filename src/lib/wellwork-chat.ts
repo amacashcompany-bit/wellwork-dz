@@ -153,98 +153,114 @@ function formatLocalPlanSummary(plans: PublicPlan[], locale: ChatRequest["locale
     .join("\n");
 }
 
+function detectResponseLocale(question: string, fallback: ChatRequest["locale"]): ChatRequest["locale"] {
+  if (/[\u0600-\u06ff]/u.test(question)) return "ar";
+  if (/\b(hello|hi|hey|who|what|how|tell|please|thanks?|employee|manager|company|payment|plan)\b/i.test(question)) {
+    return "en";
+  }
+  if (/\b(bonjour|salut|merci|comment|pourquoi|entreprise|employé|salarié|paiement|tarif|démo)\b/i.test(question)) {
+    return "fr";
+  }
+  return fallback;
+}
+
+const conversationalAnswers = {
+  fr: {
+    greeting: "Bonjour ! Je suis l’assistant WellWork. Que souhaitez-vous découvrir : la démo gratuite, les plans, l’accès entreprise, l’inscription employé ou les codes managers ?",
+    about: "Je suis l’assistant virtuel de WellWork. Je réponds aux questions sur la plateforme QVT/RPS, les espaces entreprise, les comptes employés, les accès managers, les plans, les paiements et la démo. Je peux vous guider, mais je ne peux pas consulter un compte ni accéder à des données privées.",
+    law: "La Loi algérienne 18-07 encadre la protection des données personnelles. WellWork prévoit des fonctions de confidentialité, d’anonymat et de gestion des accès pour soutenir cette démarche. La conformité réelle dépend aussi de la configuration, des procédures internes et des obligations de l’entreprise ; ceci ne remplace pas un avis juridique.",
+    demo: "Pour demander une démo gratuite :\n1. Ouvrez /auth et créez un compte ou connectez-vous.\n2. Choisissez « Demander une démo » dans l’onboarding.\n3. Envoyez les informations de l’entreprise.\n4. Après validation du superadmin, vous recevez le code d’activation de l’espace.",
+    employee: "L’employé crée un compte privé ou se connecte, choisit l’accès employé, puis saisit l’identifiant fourni par son entreprise, par exemple EMP-0142. Il n’utilise pas le code manager et son email de connexion n’est pas affiché comme identité dans l’annuaire.",
+    manager: "L’administrateur crée un code manager depuis la gestion de l’équipe et choisit ses permissions. Le manager se connecte, sélectionne l’accès manager et saisit ce code. L’administrateur peut ensuite modifier ou retirer ses autorisations.",
+    payment: "Après avoir choisi un plan payant, le checkout affiche les méthodes activées. Chargily peut traiter le paiement en ligne. CCP ou BaridiMob peuvent demander un justificatif, suivi d’une validation par le superadmin.",
+    google: "La connexion Google est disponible. Un nouvel utilisateur doit quand même terminer l’onboarding : identifiant employé pour un salarié, code d’accès pour un manager, ou activation de l’espace pour l’administrateur.",
+    privacy: "WellWork utilise le feedback anonyme et des indicateurs agrégés pour la prévention, pas pour surveiller individuellement ni établir un diagnostic médical. Ne partagez jamais de mot de passe, code d’accès, donnée de santé ou information confidentielle dans ce chat.",
+    company: "Une entreprise commence par une demande de démo ou le choix d’un plan. Après approbation ou paiement, l’administrateur active l’espace, ajoute les départements et salariés, attribue les identifiants employés et crée les codes managers avec leurs permissions.",
+    thanks: "Avec plaisir ! Je peux aussi vous guider vers la démo, les plans ou la création des accès.",
+    help: "Je peux vous aider avec : la démo gratuite, les plans et paiements, la création d’un espace entreprise, l’inscription d’un employé, les codes managers, Google Login, l’anonymat et la Loi 18-07. Posez-moi simplement votre question.",
+    fallback: "Je n’ai pas identifié précisément votre demande. Parlez-vous de la démo, d’un plan, du paiement, d’un compte employé, d’un accès manager, de l’anonymat ou de la Loi 18-07 ?",
+  },
+  en: {
+    greeting: "Hello! I’m the WellWork assistant. What would you like to explore: the free demo, plans, company access, employee signup, or manager codes?",
+    about: "I’m WellWork’s virtual assistant. I answer questions about the QVT/RPS platform, company spaces, employee accounts, manager access, plans, payments, and demos. I can guide you, but I cannot view accounts or access private data.",
+    law: "Algerian Law 18-07 governs personal-data protection. WellWork includes privacy, anonymity, and access-control features that can support this work. Actual compliance also depends on configuration, internal procedures, and the company’s legal obligations; this is not legal advice.",
+    demo: "To request a free demo:\n1. Open /auth and create an account or sign in.\n2. Choose “Request a demo” during onboarding.\n3. Submit the company details.\n4. After superadmin approval, you receive the company-space activation code.",
+    employee: "An employee creates a private account or signs in, chooses employee access, and enters the ID supplied by the company, such as EMP-0142. The employee does not use a manager code, and the login email is not displayed as the directory identity.",
+    manager: "The company administrator creates a manager code in team management and selects its permissions. The manager signs in, chooses manager access, and enters the code. The administrator can later change or revoke those permissions.",
+    payment: "After selecting a paid plan, checkout shows the enabled methods. Chargily can process online payment. CCP or BaridiMob may require payment proof followed by superadmin approval.",
+    google: "Google login is supported. New users must still finish onboarding: employees enter their employee ID, managers enter an access code, and company administrators activate their company space.",
+    privacy: "WellWork uses anonymous feedback and aggregated team insights for prevention, not individual surveillance or medical diagnosis. Never share passwords, access codes, health information, or confidential company data in this chat.",
+    company: "A company starts with a demo request or a plan. After approval or payment, its administrator activates the space, adds departments and employees, assigns employee IDs, and creates manager codes with controlled permissions.",
+    thanks: "You’re welcome! I can also guide you through the demo, plans, or account access.",
+    help: "I can help with the free demo, plans and payments, company-space setup, employee signup, manager codes, Google Login, anonymity, and Law 18-07. Just ask your question.",
+    fallback: "I’m not sure which part you mean. Is your question about the demo, a plan, payment, employee signup, manager access, privacy, or Law 18-07?",
+  },
+  ar: {
+    greeting: "مرحباً! أنا مساعد WellWork. ماذا تريد أن تعرف: العرض التجريبي المجاني، الخطط، مساحة الشركة، تسجيل الموظف، أم رموز المديرين؟",
+    about: "أنا المساعد الافتراضي لمنصة WellWork. أجيب عن أسئلة جودة الحياة في العمل والوقاية من المخاطر، ومساحات الشركات، وحسابات الموظفين، وصلاحيات المديرين، والخطط، والدفع، والعرض التجريبي. يمكنني إرشادك، لكن لا أستطيع الاطلاع على الحسابات أو البيانات الخاصة.",
+    law: "ينظم القانون الجزائري 18-07 حماية البيانات ذات الطابع الشخصي. توفر WellWork خصائص للخصوصية وإخفاء الهوية وإدارة الصلاحيات لدعم هذا المسار. لكن الامتثال الفعلي يعتمد أيضاً على إعداد المنصة وإجراءات المؤسسة والتزاماتها القانونية؛ وهذه الإجابة ليست استشارة قانونية.",
+    demo: "لطلب عرض تجريبي مجاني:\n1. افتح /auth وأنشئ حساباً أو سجّل الدخول.\n2. اختر «طلب عرض تجريبي» في صفحة البدء.\n3. أرسل معلومات الشركة.\n4. بعد موافقة المشرف العام يصلك رمز تفعيل مساحة الشركة.",
+    employee: "ينشئ الموظف حساباً خاصاً أو يسجل الدخول، ثم يختار دخول الموظف ويكتب الرقم الذي منحته له الشركة، مثل EMP-0142. لا يستخدم رمز المدير، ولا يظهر بريد تسجيل الدخول كهوية في دليل الموظفين.",
+    manager: "ينشئ مسؤول الشركة رمزاً للمدير من إدارة الفريق ويحدد صلاحياته. يسجل المدير الدخول، ويختار دخول المدير، ثم يكتب الرمز. يمكن للمسؤول تعديل الصلاحيات أو إلغاؤها لاحقاً.",
+    payment: "بعد اختيار خطة مدفوعة تظهر طرق الدفع المفعلة. يمكن لـ Chargily معالجة الدفع الإلكتروني، بينما قد تتطلب CCP أو BaridiMob رفع وصل الدفع ثم موافقة المشرف العام.",
+    google: "يمكن التسجيل أو الدخول عبر Google. يجب على المستخدم الجديد إكمال صفحة البدء: الموظف يدخل رقمه، والمدير يدخل رمز الوصول، ومسؤول الشركة يفعّل مساحة شركته.",
+    privacy: "تستخدم WellWork الملاحظات المجهولة ومؤشرات الفرق المجمعة للوقاية، وليس لمراقبة الأفراد أو تقديم تشخيص طبي. لا تشارك كلمات المرور أو رموز الوصول أو البيانات الصحية أو معلومات الشركة السرية في المحادثة.",
+    company: "تبدأ الشركة بطلب عرض تجريبي أو اختيار خطة. بعد الموافقة أو الدفع، يفعّل المسؤول المساحة، ويضيف الأقسام والموظفين وأرقامهم، وينشئ رموز المديرين مع الصلاحيات المناسبة.",
+    thanks: "على الرحب والسعة! يمكنني أيضاً إرشادك إلى العرض التجريبي أو الخطط أو إنشاء الحسابات.",
+    help: "يمكنني مساعدتك في العرض التجريبي، والخطط والدفع، وإنشاء مساحة الشركة، وتسجيل الموظف، ورموز المديرين، وتسجيل Google، والخصوصية، والقانون 18-07. اكتب سؤالك مباشرة.",
+    fallback: "لم أحدد المقصود بدقة. هل سؤالك عن العرض التجريبي، أو خطة، أو الدفع، أو حساب موظف، أو صلاحية مدير، أو الخصوصية، أو القانون 18-07؟",
+  },
+} as const;
+
 function localKnowledgeAnswer(data: ChatRequest, plans: PublicPlan[]) {
-  const question = data.messages.at(-1)?.content.toLocaleLowerCase() || "";
+  const rawQuestion = data.messages.at(-1)?.content.trim() || "";
+  const question = rawQuestion.toLocaleLowerCase();
+  const locale = detectResponseLocale(question, data.locale);
+  const answer = conversationalAnswers[locale];
   const topic = {
-    demo: /(demo|démo|تجريب)/i.test(question),
-    employee: /(employee|employé|salarié|موظف)/i.test(question),
-    manager: /(manager|gestionnaire|rh|مدير|مسير)/i.test(question),
-    payment: /(payment|paiement|pay|ccp|baridi|chargily|دفع)/i.test(question),
-    plan: /(plan|pricing|price|tarif|prix|خطة|خطط|سعر|أسعار)/i.test(question),
-    company: /(company|entreprise|société|space|espace|شركة|مؤسسة|مساحة)/i.test(question),
+    about: /\b(who are you|what are you|tell me about (you|yourself)|what is wellwork|about wellwork)\b|qui es[- ]tu|parle[- ]moi de toi|c['’]est quoi wellwork|من أنت|من انت|عرف نفسك|ما (هي|هو) wellwork/i.test(question),
+    greeting: /^(hello|hi|hey|good morning|good evening|bonjour|salut|coucou|مرحبا|مرحباً|أهلا|اهلا|السلام عليكم|سلام)[!?.،\s]*$/i.test(question),
+    law: /18\s*[-–]\s*07|loi\s*18|law\s*18|قانون\s*18/i.test(question),
+    demo: /(demo|démo|trial|تجريب|عرض تجريبي)/i.test(question),
+    employee: /(employee|employé|salarié|worker|موظف|عامل)/i.test(question),
+    manager: /(manager|gestionnaire|human resources|\brh\b|مدير|مسير|موارد بشرية)/i.test(question),
+    payment: /(payment|paiement|checkout|pay|ccp|baridi|chargily|دفع|بريدي موب)/i.test(question),
+    plan: /(plan|pricing|price|tarif|prix|subscription|خطة|خطط|سعر|أسعار|اشتراك)/i.test(question),
+    company: /(company|entreprise|société|organization|company space|espace entreprise|شركة|مؤسسة|مساحة الشركة)/i.test(question),
     google: /(google|gmail)/i.test(question),
-    privacy: /(anonymous|anonyme|privacy|confidential|مجهول|خصوصية|سري)/i.test(question),
+    privacy: /(anonymous|anonyme|anonymity|privacy|confidential|مجهول|خصوصية|سري|الهوية)/i.test(question),
+    thanks: /\b(thanks?|thank you|merci)\b|شكرا|شكراً/i.test(question),
+    help: /^(help|aide|مساعدة|ساعدني)[!?.،\s]*$/i.test(question),
   };
 
-  if (data.locale === "ar") {
-    if (topic.demo) {
-      return "لطلب عرض تجريبي مجاني:\n1. افتح صفحة تسجيل الدخول /auth وأنشئ حساباً أو سجّل الدخول.\n2. في صفحة البدء اختر «طلب عرض تجريبي».\n3. أدخل معلومات الشركة وبيانات التواصل.\n4. يراجع المشرف العام الطلب، وبعد الموافقة يصلك رمز لتفعيل مساحة الشركة.";
-    }
-    if (topic.employee) {
-      return "ينشئ الموظف حسابه الخاص أو يسجل الدخول، ثم يختار الانضمام كموظف ويدخل رقم الموظف الذي قدمته الشركة، مثل EMP-0142. لا يحتاج الموظف إلى رمز وصول الشركة، ولا يظهر بريده الإلكتروني كهوية في دليل الموظفين.";
-    }
-    if (topic.manager) {
-      return "ينشئ مسؤول الشركة رمز وصول للمدير من لوحة إدارة الفريق، ويحدد الصلاحيات المسموحة. بعد تسجيل الدخول يختار المدير الانضمام كمدير ويدخل الرمز. يمكن لمسؤول الشركة تعديل الصلاحيات لاحقاً.";
-    }
-    if (topic.payment) {
-      return "بعد اختيار خطة مدفوعة من قسم الأسعار، تفتح صفحة الدفع وتعرض الطرق المفعلة. يمكن لـ Chargily توجيهك للدفع الإلكتروني، بينما قد تتطلب CCP أو BaridiMob رفع وصل الدفع وانتظار موافقة المشرف العام.";
-    }
-    if (topic.plan) return `${formatLocalPlanSummary(plans, data.locale)}\n\nافتح قسم الأسعار /#pricing لاختيار الخطة المناسبة.`;
-    if (topic.google) {
-      return "يمكن التسجيل أو الدخول عبر Google. إذا كان الحساب جديداً، يجب إكمال صفحة البدء؛ الموظف يدخل رقم الموظف، والمدير يدخل رمز الوصول، ومسؤول الشركة يفعّل مساحة شركته.";
-    }
-    if (topic.privacy) {
-      return "تستخدم WellWork الملاحظات المجهولة والتحليلات المجمعة لفهم مؤشرات الفرق، وليس لمراقبة الأفراد أو تقديم تشخيص طبي. لا ترسل كلمات المرور أو الرموز أو البيانات الصحية أو معلومات الشركة السرية في المحادثة.";
-    }
-    if (topic.company) {
-      return "تبدأ الشركة بطلب عرض تجريبي أو اختيار خطة. بعد الموافقة أو الدفع، يفعّل المسؤول مساحة الشركة، ثم يضيف الأقسام والموظفين وأرقامهم، وينشئ رموز المديرين مع الصلاحيات المناسبة.";
-    }
-    return "تساعد WellWork الشركات على إدارة جودة الحياة في العمل والوقاية من المخاطر النفسية والاجتماعية من خلال الاستبيانات، الملاحظات المجهولة، مؤشرات الفرق، التنبيهات، خطط العمل والموارد. اسألني عن العرض التجريبي أو الخطط أو حسابات الموظفين والمديرين.";
+  if (topic.about) return answer.about;
+  if (topic.greeting) return answer.greeting;
+  if (topic.law) return answer.law;
+  if (topic.demo) return answer.demo;
+  if (topic.employee) return answer.employee;
+  if (topic.manager) return answer.manager;
+  if (topic.payment) return answer.payment;
+  if (topic.plan) {
+    const suffix =
+      locale === "ar"
+        ? "\n\nافتح قسم الأسعار /#pricing للمقارنة واختيار الخطة."
+        : locale === "en"
+          ? "\n\nOpen /#pricing to compare and select a plan."
+          : "\n\nOuvrez /#pricing pour comparer et choisir un plan.";
+    return `${formatLocalPlanSummary(plans, locale)}${suffix}`;
   }
-
-  if (data.locale === "en") {
-    if (topic.demo) {
-      return "To request a free demo:\n1. Open /auth and create an account or sign in.\n2. In onboarding, choose “Request a demo.”\n3. Submit the company and contact details.\n4. The superadmin reviews the request. Once approved, you receive a code to activate the company space.";
-    }
-    if (topic.employee) {
-      return "The employee creates a private account or signs in, chooses the employee onboarding option, and enters the employee ID supplied by the company, such as EMP-0142. Employees do not need the general company access code.";
-    }
-    if (topic.manager) {
-      return "The company administrator creates a manager access code and selects its permissions. The manager signs in, chooses manager onboarding, and enters that code. The administrator can later update the manager’s permissions.";
-    }
-    if (topic.payment) {
-      return "After selecting a paid plan, checkout displays the enabled methods. Chargily can redirect to online payment. CCP or BaridiMob may require uploading payment proof and waiting for superadmin approval.";
-    }
-    if (topic.plan) return `${formatLocalPlanSummary(plans, data.locale)}\n\nOpen /#pricing to compare and select a plan.`;
-    if (topic.google) {
-      return "Google login is supported. New users must still complete onboarding: employees enter their employee ID, managers enter their access code, and company administrators activate their company space.";
-    }
-    if (topic.privacy) {
-      return "WellWork uses anonymous feedback and aggregated team insights for prevention, not individual surveillance or medical diagnosis. Never share passwords, access codes, health information, or confidential company data in chat.";
-    }
-    if (topic.company) {
-      return "A company begins with a demo request or paid plan. After approval or payment, its administrator activates the company space, adds departments and employees, assigns employee IDs, and creates permission-controlled manager codes.";
-    }
-    return "WellWork helps organizations manage workplace quality of life and psychosocial-risk prevention through pulse surveys, anonymous feedback, team insights, alerts, action plans, resources and administration. Ask me about demos, plans, employees or manager access.";
-  }
-
-  if (topic.demo) {
-    return "Pour demander une démo gratuite :\n1. Ouvrez /auth et créez un compte ou connectez-vous.\n2. Dans l’onboarding, choisissez « Demander une démo ».\n3. Envoyez les informations de l’entreprise et du contact.\n4. Le superadmin examine la demande. Après approbation, vous recevez un code pour activer l’espace entreprise.";
-  }
-  if (topic.employee) {
-    return "L’employé crée son compte privé ou se connecte, choisit l’accès employé, puis saisit l’identifiant fourni par son entreprise, par exemple EMP-0142. Il n’a pas besoin du code d’accès général de l’entreprise.";
-  }
-  if (topic.manager) {
-    return "L’administrateur de l’entreprise génère un code manager et sélectionne ses permissions. Le manager se connecte, choisit l’accès manager et saisit ce code. L’administrateur peut ensuite modifier ses autorisations.";
-  }
-  if (topic.payment) {
-    return "Après le choix d’un plan payant, le checkout affiche les méthodes activées. Chargily peut rediriger vers le paiement en ligne. CCP ou BaridiMob peuvent demander un justificatif, puis une validation du superadmin.";
-  }
-  if (topic.plan) return `${formatLocalPlanSummary(plans, data.locale)}\n\nOuvrez /#pricing pour comparer et choisir un plan.`;
-  if (topic.google) {
-    return "La connexion Google est disponible. Un nouvel utilisateur doit tout de même terminer l’onboarding : identifiant employé pour un salarié, code d’accès pour un manager, ou activation de l’espace pour l’administrateur.";
-  }
-  if (topic.privacy) {
-    return "WellWork utilise le feedback anonyme et des indicateurs agrégés d’équipe pour la prévention, pas pour surveiller individuellement ou établir un diagnostic médical. Ne partagez jamais de mot de passe, code, donnée de santé ou information confidentielle dans le chat.";
-  }
-  if (topic.company) {
-    return "L’entreprise commence par une demande de démo ou un plan payant. Après approbation ou paiement, l’administrateur active l’espace, ajoute les départements et salariés, attribue les identifiants employés et crée les codes managers avec leurs permissions.";
-  }
-  return "WellWork aide les organisations à piloter la qualité de vie au travail et la prévention des RPS grâce aux questionnaires, au feedback anonyme, aux indicateurs d’équipe, alertes, plans d’action et ressources. Demandez-moi comment obtenir une démo, choisir un plan ou créer un accès.";
+  if (topic.google) return answer.google;
+  if (topic.privacy) return answer.privacy;
+  if (topic.company) return answer.company;
+  if (topic.thanks) return answer.thanks;
+  if (topic.help) return answer.help;
+  return answer.fallback;
 }
 
 function buildGroundedPrompt(data: ChatRequest, plans: PublicPlan[]) {
-  const languageName = data.locale === "ar" ? "Arabic" : data.locale === "en" ? "English" : "French";
+  const latestQuestion = data.messages.at(-1)?.content || "";
+  const responseLocale = detectResponseLocale(latestQuestion, data.locale);
+  const languageName = responseLocale === "ar" ? "Arabic" : responseLocale === "en" ? "English" : "French";
   const conversation = data.messages
     .map((message) => `${message.role === "user" ? "Visitor" : "WellWork assistant"}: ${message.content}`)
     .join("\n");
@@ -287,9 +303,6 @@ export const askWellWorkAssistant = createServerFn({ method: "POST" })
   .validator(validateRequest)
   .handler(async ({ data }) => {
     const apiKey = process.env.ATOMESUS_API_KEY;
-    if (!apiKey) {
-      throw new Error("The WellWork assistant is not configured yet.");
-    }
 
     const { getRequest } = await import("@tanstack/react-start/server");
     const request = getRequest();
@@ -298,6 +311,9 @@ export const askWellWorkAssistant = createServerFn({ method: "POST" })
     enforceRateLimit(identifier);
 
     const plans = await loadActivePlans();
+    if (!apiKey) {
+      return { answer: localKnowledgeAnswer(data, plans), source: "local" as const };
+    }
     if (Date.now() < providerUnavailableUntil) {
       return { answer: localKnowledgeAnswer(data, plans), source: "local" as const };
     }

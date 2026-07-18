@@ -49,8 +49,8 @@ function Landing() {
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden font-sans">
       {/* ============== NAV ============== */}
       <header className="fixed top-0 inset-x-0 z-50 glass border-b border-border/40">
-        <div className="max-w-7xl mx-auto grid grid-cols-[1fr_auto] items-center gap-x-2 px-4 pb-12 pt-2 sm:flex sm:h-16 sm:px-6 sm:py-0">
-          <Link to="/" className="flex min-w-0 items-center gap-2 group sm:gap-2.5">
+        <div className="max-w-7xl mx-auto grid grid-cols-[1fr_auto] items-center gap-x-2 px-4 pb-12 pt-2 sm:flex sm:h-16 sm:px-6 sm:py-0 md:h-20 md:justify-between md:gap-x-6 md:px-8">
+          <Link to="/" className="flex min-w-0 items-center gap-2 group sm:gap-2.5 md:shrink-0">
             <motion.img
               src={logoMark}
               alt="WellWork"
@@ -62,16 +62,16 @@ function Landing() {
             />
             <span className="truncate font-display text-base font-bold tracking-normal sm:text-lg">WellWork</span>
           </Link>
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
-            <a href="#platform" className="hover:text-foreground transition">{t("landingNavPlatform")}</a>
-            <a href="#approach" className="hover:text-foreground transition">{t("landingNavApproach")}</a>
-            <a href="#insights" className="hover:text-foreground transition">{t("landingNavInsights")}</a>
-            <a href="#pricing" className="hover:text-foreground transition">{t("landingNavPricing")}</a>
+          <nav className="hidden md:flex min-w-0 flex-1 items-center justify-center gap-4 text-sm font-medium text-muted-foreground lg:gap-8">
+            <a href="#platform" className="whitespace-nowrap px-2 py-2 hover:text-foreground transition">{t("landingNavPlatform")}</a>
+            <a href="#approach" className="whitespace-nowrap px-2 py-2 hover:text-foreground transition">{t("landingNavApproach")}</a>
+            <a href="#insights" className="whitespace-nowrap px-2 py-2 hover:text-foreground transition">{t("landingNavInsights")}</a>
+            <a href="#pricing" className="whitespace-nowrap px-2 py-2 hover:text-foreground transition">{t("landingNavPricing")}</a>
           </nav>
-          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2 md:gap-3">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-foreground sm:w-auto sm:gap-1.5 sm:px-2">
+                <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-foreground sm:w-auto sm:gap-1.5 sm:px-2 md:h-10 md:px-3">
                   <img src={currentLang.flag} alt={currentLang.code} className="w-4 h-3 object-cover rounded-sm shadow-sm" />
                   <span className="hidden sm:inline uppercase text-xs font-semibold">{currentLang.code}</span>
                 </Button>
@@ -85,21 +85,21 @@ function Landing() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <Button variant="ghost" size="icon" onClick={toggleDark} aria-label="Toggle theme" className="h-9 w-9 text-muted-foreground hover:text-foreground">
+            <Button variant="ghost" size="icon" onClick={toggleDark} aria-label="Toggle theme" className="h-9 w-9 text-muted-foreground hover:text-foreground md:h-10 md:w-10">
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </Button>
 
             {user ? (
               <Link to="/onboarding" className="absolute left-4 right-4 top-[3.25rem] sm:static sm:w-auto">
-                <Button className="gradient-brand h-9 w-full rounded-full border-0 px-5 text-white shadow-elegant sm:h-10 sm:w-auto">
+                <Button className="gradient-brand h-9 w-full rounded-full border-0 px-5 text-white shadow-elegant sm:h-10 sm:w-auto md:h-11 md:px-6 md:whitespace-nowrap">
                   Tableau de bord
                 </Button>
               </Link>
             ) : (
               <>
-                <Link to="/auth" className="text-sm font-medium hover:text-brand transition-colors hidden sm:inline-flex px-3">{t("landingLogin")}</Link>
+                <Link to="/auth" className="hidden whitespace-nowrap px-3 py-2 text-sm font-medium transition-colors hover:text-brand sm:inline-flex md:px-4">{t("landingLogin")}</Link>
                 <Link to="/auth" className="absolute left-4 right-4 top-[3.25rem] sm:static">
-                  <Button className="gradient-leaf h-9 w-full rounded-full border-0 px-5 text-sm text-white shadow-elegant sm:h-10 sm:w-auto">
+                  <Button className="gradient-leaf h-9 w-full rounded-full border-0 px-5 text-sm text-white shadow-elegant sm:h-10 sm:w-auto md:h-11 md:px-6 md:whitespace-nowrap">
                     {t("landingDemoBtn")} <ArrowUpRight className="w-4 h-4 ms-1" />
                   </Button>
                 </Link>
