@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Bot, ChevronRight, ExternalLink, MessageCircle, Mic, Send, X } from "lucide-react";
+import { ChevronRight, ExternalLink, MessageCircle, Mic, Send, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { useI18n } from "@/hooks/useI18n";
 import { getInstantWellWorkAnswer, type WellWorkChatMessage } from "@/lib/wellwork-chat";
-import logoMark from "@/assets/brand/wellwork-logo-mark.png";
+import assistantMascot from "@/assets/brand/wellwork-assistant-mascot.png";
 
 type DisplayMessage = WellWorkChatMessage & {
   id: string;
@@ -34,6 +34,37 @@ type SpeechRecognitionInstance = {
 };
 
 type SpeechRecognitionConstructor = new () => SpeechRecognitionInstance;
+
+type MascotAvatarProps = {
+  size?: "message" | "header" | "launcher";
+  greeting?: boolean;
+};
+
+function MascotAvatar({ size = "header", greeting = false }: MascotAvatarProps) {
+  const sizeClass =
+    size === "launcher"
+      ? "h-14 w-14"
+      : size === "message"
+        ? "h-9 w-9"
+        : "h-12 w-12";
+
+  return (
+    <span
+      className={`wellwork-mascot relative inline-grid shrink-0 place-items-center ${sizeClass}`}
+      aria-hidden="true"
+    >
+      <img
+        src={assistantMascot}
+        alt=""
+        className={`wellwork-mascot-character h-full w-full object-contain ${
+          greeting ? "wellwork-mascot-greeting" : ""
+        }`}
+      />
+      <span className="wellwork-mascot-shadow" />
+      {size !== "message" && <span className="wellwork-mascot-sparkle" />}
+    </span>
+  );
+}
 
 const copy = {
   fr: {
@@ -201,9 +232,7 @@ export function WellWorkChatbot() {
             <header className="relative overflow-hidden border-b border-border bg-primary px-4 py-3 text-primary-foreground">
               <div className="absolute inset-y-0 end-0 w-28 bg-leaf/15" />
               <div className="relative flex items-center gap-3">
-                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-white shadow-sm">
-                  <img src={logoMark} alt="" className="h-8 w-8 object-contain" />
-                </div>
+                <MascotAvatar greeting />
                 <div className="min-w-0 flex-1">
                   <h2 className="truncate text-sm font-semibold">{text.title}</h2>
                   <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-primary-foreground/75">
@@ -247,9 +276,7 @@ export function WellWorkChatbot() {
                     className={`flex items-end gap-2 ${message.role === "user" ? "justify-end" : "justify-start"}`}
                   >
                     {message.role === "assistant" && (
-                      <div className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-primary text-primary-foreground">
-                        <Bot className="h-3.5 w-3.5" />
-                      </div>
+                      <MascotAvatar size="message" />
                     )}
                     <div
                       className={`max-w-[82%] whitespace-pre-wrap rounded-lg px-3.5 py-2.5 text-sm leading-relaxed ${
@@ -334,13 +361,10 @@ export function WellWorkChatbot() {
           whileHover={{ y: -2 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => setOpen(true)}
-          className="ms-auto flex h-13 items-center gap-2 rounded-lg border border-white/15 bg-primary px-3 text-primary-foreground shadow-[0_12px_35px_-10px_rgba(15,23,42,0.55)] transition hover:bg-primary/95 sm:px-4"
+          className="ms-auto flex h-16 items-center gap-1.5 rounded-lg border border-white/15 bg-primary px-2.5 text-primary-foreground shadow-[0_12px_35px_-10px_rgba(15,23,42,0.55)] transition hover:bg-primary/95 sm:gap-2 sm:px-3.5"
           aria-label={text.open}
         >
-          <span className="relative grid h-9 w-9 place-items-center rounded-md bg-white">
-            <img src={logoMark} alt="" className="h-7 w-7 object-contain" />
-            <span className="absolute -end-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-leaf" />
-          </span>
+          <MascotAvatar size="launcher" />
           <span className="hidden text-start sm:block">
             <span className="block text-xs font-semibold">{text.open}</span>
             <span className="block text-[10px] text-primary-foreground/65">{text.title}</span>
