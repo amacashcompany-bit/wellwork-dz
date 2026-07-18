@@ -1,5 +1,6 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import {
   BarChart3, Bell, BookOpen, Bot, Calendar, HelpCircle, Home, Inbox, LayoutDashboard,
   Lightbulb, MessageSquare, Plug, ScrollText, Settings, ShieldQuestion, Users, UserCog,
@@ -8,6 +9,7 @@ import {
 import { useI18n } from "@/hooks/useI18n";
 import { useStore } from "@/store/useStore";
 import { useMySpace, hasRole, useManagerPermissions } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import type { ManagerModule } from "@/lib/manager-access";
 import type { DictKey } from "@/lib/i18n";
 
@@ -16,7 +18,7 @@ const adminItems: { to: string; icon: React.ComponentType<{ className?: string }
   { to: "/admin/employees", icon: Users, key: "employees", module: "employees" },
   { to: "/admin/team", icon: UserCog, key: "employees", adminOnly: true },
   { to: "/admin/surveys", icon: ScrollText, key: "surveys", module: "surveys" },
-  { to: "/admin/anonymous", icon: ShieldQuestion, key: "anonymousSpace", badge: "3", module: "alerts" },
+  { to: "/admin/anonymous", icon: ShieldQuestion, key: "anonymousSpace", module: "alerts" },
   { to: "/admin/burnout", icon: Bot, key: "burnoutEngine", badge: "!", module: "alerts" },
   { to: "/admin/alerts", icon: Bell, key: "alerts", module: "alerts" },
   { to: "/admin/actions", icon: Lightbulb, key: "actionPlans", module: "actions" },
@@ -44,6 +46,7 @@ const superAdminItems: { to: string; icon: React.ComponentType<{ className?: str
 export function Sidebar() {
   const { t, direction, pick } = useI18n();
   const { info } = useMySpace();
+  const [anonymousCount, setAnonymousCount] = useState<number | null>(null);
   const isSuperAdmin = hasRole(info?.roles ?? [], "super_admin");
   const isEmployee = hasRole(info?.roles ?? [], "employee");
   const isManager = hasRole(info?.roles ?? [], "manager") && !hasRole(info?.roles ?? [], ["hr_admin", "super_admin"]);
@@ -57,6 +60,44 @@ export function Sidebar() {
   const isSidebarCollapsed = useStore((s) => s.isSidebarCollapsed);
   const toggleSidebar = useStore((s) => s.toggleSidebar);
 
+  useEffect(() => {
+    const spaceId = info?.spaceId;
+    if (!spaceId || isEmployee) {
+      setAnonymousCount(null);
+      return;
+    }
+
+    let mounted = true;
+    const loadCount = async () => {
+      const { count, error } = await supabase
+        .from("feedback_tickets")
+        .select("id", { count: "exact", head: true })
+        .eq("space_id", spaceId);
+
+      if (mounted && !error) setAnonymousCount(count ?? 0);
+    };
+
+    void loadCount();
+    const channel = supabase
+      .channel(`sidebar-feedback-${spaceId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "feedback_tickets",
+          filter: `space_id=eq.${spaceId}`,
+        },
+        () => void loadCount(),
+      )
+      .subscribe();
+
+    return () => {
+      mounted = false;
+      void supabase.removeChannel(channel);
+    };
+  }, [info?.spaceId, isEmployee]);
+
   return (
     <aside
       className={`fixed top-16 bottom-0 ${isSidebarCollapsed ? "w-20" : "w-64"} bg-sidebar text-sidebar-foreground border-sidebar-border ${
@@ -67,6 +108,10 @@ export function Sidebar() {
         {items.map((item) => {
           const active = location.pathname === item.to || location.pathname.startsWith(item.to + "/");
           const Icon = item.icon;
+          const badge =
+            item.to === "/admin/anonymous" && anonymousCount !== null
+              ? String(anonymousCount)
+              : item.badge;
           return (
             <Link
               key={item.to}
@@ -87,10 +132,10 @@ export function Sidebar() {
               {!isSidebarCollapsed && (
                 <>
                   <span className="relative z-10 flex-1 truncate">{t(item.key)}</span>
-                  {item.badge && (
+                  {badge && (
                     <span className={`relative z-10 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-                      item.badge === "!" ? "bg-danger text-white" : "bg-white/20 text-white"
-                    }`}>{item.badge}</span>
+                      badge === "!" ? "bg-danger text-white" : "bg-white/20 text-white"
+                    }`}>{badge}</span>
                   )}
                 </>
               )}
