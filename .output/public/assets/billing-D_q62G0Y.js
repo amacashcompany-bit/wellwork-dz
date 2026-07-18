@@ -1,0 +1,1 @@
+import{t as e}from"./client-CtRRebDM.js";var t=e;function n(e,t){return e===null?`Sur devis`:new Intl.NumberFormat(`fr-DZ`,{style:`currency`,currency:t,maximumFractionDigits:0}).format(e)}export{n,t};
