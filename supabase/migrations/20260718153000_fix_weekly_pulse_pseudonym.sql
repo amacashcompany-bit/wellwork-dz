@@ -1,6 +1,6 @@
--- Real anonymous weekly pulse ingestion for the burn-out prevention analysis.
--- Identity is stored only in survey_participation to prevent duplicate weekly
--- submissions. It is never linked to the anonymous response batch.
+-- The blind vault stores survey participation under a cryptographic pseudonym,
+-- not auth.users.id. Keep duplicate prevention private and compatible with the
+-- current survey_participation schema.
 
 CREATE OR REPLACE FUNCTION public.submit_weekly_wellbeing_pulse(
   _space_id uuid,
@@ -60,7 +60,7 @@ BEGIN
     VALUES (
       _space_id,
       'WellWork Weekly Pulse ' || _week_start::text,
-      'نبض WellWork الأسبوعي ' || _week_start::text,
+      'WellWork Weekly Pulse ' || _week_start::text,
       'Anonymous weekly team wellbeing pulse used for preventive aggregate analysis.',
       'custom',
       'open',
@@ -73,17 +73,17 @@ BEGIN
       survey_id, space_id, ord, qtype, prompt, prompt_ar, factor
     )
     VALUES
-      (_survey_id, _space_id, 1, 'likert5', 'How do you feel today?', 'كيف تشعر اليوم؟', 'mood'),
-      (_survey_id, _space_id, 2, 'likert5', 'Your energy this week', 'مستوى طاقتك هذا الأسبوع', 'energy'),
-      (_survey_id, _space_id, 3, 'likert5', 'My workload is reasonable', 'عبء عملي معقول', 'manageable_workload'),
-      (_survey_id, _space_id, 4, 'likert5', 'I can organize my work', 'لدي حرية تنظيم عملي', 'autonomy'),
-      (_survey_id, _space_id, 5, 'likert5', 'I complete tasks on time', 'أستطيع إنجاز مهامي في الوقت', 'manageable_workload'),
-      (_survey_id, _space_id, 6, 'likert5', 'My manager supports me', 'مديري يدعمني عند الحاجة', 'support'),
-      (_survey_id, _space_id, 7, 'likert5', 'My work is recognized', 'عملي معترف به', 'recognition'),
-      (_survey_id, _space_id, 8, 'likert5', 'Internal communication is clear', 'التواصل الداخلي واضح', 'communication'),
-      (_survey_id, _space_id, 9, 'likert5', 'My workstation is comfortable', 'مكان عملي مريح', 'environment'),
-      (_survey_id, _space_id, 10, 'likert5', 'I can disconnect outside work', 'أستطيع الانفصال عن العمل', 'balance'),
-      (_survey_id, _space_id, 11, 'text', 'Optional comment', 'تعليق اختياري', 'comment');
+      (_survey_id, _space_id, 1, 'likert5', 'How do you feel today?', 'How do you feel today?', 'mood'),
+      (_survey_id, _space_id, 2, 'likert5', 'Your energy this week', 'Your energy this week', 'energy'),
+      (_survey_id, _space_id, 3, 'likert5', 'My workload is reasonable', 'My workload is reasonable', 'manageable_workload'),
+      (_survey_id, _space_id, 4, 'likert5', 'I can organize my work', 'I can organize my work', 'autonomy'),
+      (_survey_id, _space_id, 5, 'likert5', 'I complete tasks on time', 'I complete tasks on time', 'manageable_workload'),
+      (_survey_id, _space_id, 6, 'likert5', 'My manager supports me', 'My manager supports me', 'support'),
+      (_survey_id, _space_id, 7, 'likert5', 'My work is recognized', 'My work is recognized', 'recognition'),
+      (_survey_id, _space_id, 8, 'likert5', 'Internal communication is clear', 'Internal communication is clear', 'communication'),
+      (_survey_id, _space_id, 9, 'likert5', 'My workstation is comfortable', 'My workstation is comfortable', 'environment'),
+      (_survey_id, _space_id, 10, 'likert5', 'I can disconnect outside work', 'I can disconnect outside work', 'balance'),
+      (_survey_id, _space_id, 11, 'text', 'Optional comment', 'Optional comment', 'comment');
   END IF;
 
   IF EXISTS (
