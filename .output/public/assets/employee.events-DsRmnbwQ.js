@@ -1,0 +1,1 @@
+import{t as e}from"./EventsPage-C_xmMK-R.js";var t=e;export{t as component};
