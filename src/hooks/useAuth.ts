@@ -32,13 +32,15 @@ export function useAuth() {
 
   useEffect(() => {
     let mounted = true;
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getSession().then(({ data }) => {
       if (!mounted) return;
-      setUser(data.user);
+      setUser(data.session?.user ?? null);
       setLoading(false);
     });
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      if (!mounted) return;
       setUser(session?.user ?? null);
+      setLoading(false);
     });
     return () => { mounted = false; sub.subscription.unsubscribe(); };
   }, []);

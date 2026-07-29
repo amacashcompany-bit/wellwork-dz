@@ -54,12 +54,17 @@ function AuthPage() {
 
   const doSignUp = async () => {
     setBusy(true);
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email, password,
       options: { emailRedirectTo: window.location.origin, data: { full_name: fullName } },
     });
     setBusy(false);
     if (error) return toast.error(error.message);
+    if (!data.session) {
+      toast.info("Compte cree. Verifiez votre email avant de vous connecter.");
+      setTab("signin");
+      return;
+    }
     toast.success("Compte créé");
     continueAfterAuth();
   };

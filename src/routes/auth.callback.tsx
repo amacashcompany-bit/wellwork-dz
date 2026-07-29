@@ -20,8 +20,18 @@ function GoogleAuthCallback() {
       const code = params.get("code");
       if (!code) { if (active) setError("Code Google manquant. Veuillez recommencer la connexion."); return; }
 
-      const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+      const { data: exchangeData, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
       if (exchangeError) { if (active) setError(exchangeError.message); return; }
+      if (!exchangeData.session?.user) {
+        if (active) setError("La session Google n'a pas pu etre creee. Veuillez recommencer.");
+        return;
+      }
+
+      const { data: persistedSession } = await supabase.auth.getSession();
+      if (!persistedSession.session?.user) {
+        if (active) setError("La session Google n'a pas pu etre enregistree dans ce navigateur.");
+        return;
+      }
 
       const activationToken = sessionStorage.getItem("wellwork-activation-token");
       if (activationToken) { window.location.replace(`/activate?token=${activationToken}`); return; }

@@ -1,0 +1,1 @@
+import{t as e}from"./MessagingPage-hYZU-pW-.js";var t=e;export{t as component};
